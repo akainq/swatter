@@ -1,0 +1,36 @@
+# Elixir / Phoenix (server/)
+server/_build/
+server/deps/
+server/*.ez
+server/erl_crash.dump
+server/.elixir_ls/
+server/.lexical/
+server/priv/static/assets/
+
+# Node / Bun / Vite (web/)
+web/node_modules/
+web/dist/
+web/*.local
+
+# Conformance-приложения (conformance/)
+conformance/**/node_modules/
+conformance/python/.venv/
+conformance/rust/target/
+conformance/elixir/_build/
+conformance/elixir/deps/
+conformance/cpp/build/
+conformance/sourcemaps/dist/
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+
+# OS / editors
+Thumbs.db
+.DS_Store
+*.swp
+.idea/
+.vscode/
+.claude/
+CLAUDE.md

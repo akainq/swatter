@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  server:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+      redis:
+        image: redis:8-alpine
+        ports:
+          - "6379:6379"
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      MIX_ENV: test
+      # в CI сервисы на стандартных портах (локально — 5433/6380, см. compose.yaml)
+      PGPORT: "5432"
+      REDIS_PORT: "6379"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: "29"
+          elixir-version: "1.20"
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      # conformance-матрица: node/go/python; rust и erlang/elixir/bun уже
+      # есть на runner'е/из шагов выше; тесты сами скипают отсутствующие
+      # тулчейны (C++ — opt-in через SWATTER_CPP_CONFORMANCE)
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/cache@v4
+        with:
+          path: |
+            server/deps
+            server/_build
+          key: mix-${{ runner.os }}-${{ hashFiles('server/mix.lock') }}
+          restore-keys: mix-${{ runner.os }}-
+      - name: Install conformance SDK deps
+        working-directory: conformance/bun
+        run: bun install
+      - run: mix deps.get
+      - run: mix format --check-formatted
+      - run: mix compile --warnings-as-errors
+      - run: mix test
+      - name: Install sourcemaps conformance deps (esbuild + sentry plugin)
+        working-directory: conformance/sourcemaps
+        run: bun install
+      - name: Conformance against real Sentry SDKs + sourcemap symbolication
+        run: mix test --only conformance
+      - name: OpenAPI spec freshness (ADR-0008)
+        run: |
+          mix openapi.spec.json --spec SwatterWeb.ApiSpec --pretty=true priv/openapi.json
+          git diff --exit-code -- priv/openapi.json
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun run lint
+      - run: bun run build
+      - name: API TS types freshness (ADR-0008)
+        run: |
+          bun run api:types
+          git diff --exit-code -- src/api/schema.d.ts

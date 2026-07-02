@@ -1,0 +1,1842 @@
+{
+  "components": {
+    "responses": {},
+    "schemas": {
+      "Artifact": {
+        "properties": {
+          "debugId": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "id": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "name": {
+            "nullable": true,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "size": {
+            "description": "размер распакованного контента",
+            "type": "integer",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "type": {
+            "enum": [
+              "source_map",
+              "minified_source"
+            ],
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "id",
+          "debugId",
+          "type",
+          "size"
+        ],
+        "title": "Artifact",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.Artifact",
+        "x-validate": null
+      },
+      "CurrentUser": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "id": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "memberships": {
+            "items": {
+              "properties": {
+                "organization": {
+                  "$ref": "#/components/schemas/Organization"
+                },
+                "role": {
+                  "enum": [
+                    "owner",
+                    "admin",
+                    "member"
+                  ],
+                  "type": "string",
+                  "x-struct": null,
+                  "x-validate": null
+                }
+              },
+              "required": [
+                "role",
+                "organization"
+              ],
+              "type": "object",
+              "x-struct": null,
+              "x-validate": null
+            },
+            "type": "array",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "name": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "memberships"
+        ],
+        "title": "CurrentUser",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.CurrentUser",
+        "x-validate": null
+      },
+      "Error": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "detail"
+        ],
+        "title": "Error",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.Error",
+        "x-validate": null
+      },
+      "Event": {
+        "properties": {
+          "breadcrumbs": {
+            "description": "breadcrumbs из исходного события",
+            "nullable": true,
+            "x-struct": null,
+            "x-validate": null
+          },
+          "contexts": {
+            "description": "contexts из исходного события",
+            "nullable": true,
+            "x-struct": null,
+            "x-validate": null
+          },
+          "dateReceived": {
+            "format": "date-time",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "environment": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "eventId": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "exception": {
+            "description": "Структура exception из исходного события (values/stacktrace/frames)",
+            "nullable": true,
+            "x-struct": null,
+            "x-validate": null
+          },
+          "level": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "message": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "platform": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "release": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "sdk": {
+            "properties": {
+              "name": {
+                "type": "string",
+                "x-struct": null,
+                "x-validate": null
+              },
+              "version": {
+                "type": "string",
+                "x-struct": null,
+                "x-validate": null
+              }
+            },
+            "type": "object",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/TagEntry"
+            },
+            "type": "array",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "traceId": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "user": {
+            "properties": {
+              "email": {
+                "type": "string",
+                "x-struct": null,
+                "x-validate": null
+              },
+              "id": {
+                "type": "string",
+                "x-struct": null,
+                "x-validate": null
+              },
+              "ipAddress": {
+                "type": "string",
+                "x-struct": null,
+                "x-validate": null
+              }
+            },
+            "type": "object",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "eventId",
+          "timestamp",
+          "level"
+        ],
+        "title": "Event",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.Event",
+        "x-validate": null
+      },
+      "EventList": {
+        "items": {
+          "$ref": "#/components/schemas/Event"
+        },
+        "title": "EventList",
+        "type": "array",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.EventList",
+        "x-validate": null
+      },
+      "FilterValues": {
+        "properties": {
+          "environments": {
+            "items": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            },
+            "type": "array",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "releases": {
+            "items": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            },
+            "type": "array",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "environments",
+          "releases"
+        ],
+        "title": "FilterValues",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.FilterValues",
+        "x-validate": null
+      },
+      "Issue": {
+        "properties": {
+          "count": {
+            "description": "times_seen",
+            "type": "integer",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "culprit": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "firstSeen": {
+            "format": "date-time",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "id": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "lastSeen": {
+            "format": "date-time",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "level": {
+            "enum": [
+              "fatal",
+              "error",
+              "warning",
+              "info",
+              "debug"
+            ],
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "project": {
+            "nullable": true,
+            "properties": {
+              "id": {
+                "type": "string",
+                "x-struct": null,
+                "x-validate": null
+              },
+              "slug": {
+                "type": "string",
+                "x-struct": null,
+                "x-validate": null
+              }
+            },
+            "type": "object",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "regressed": {
+            "description": "вернулся в релизе новее закрытия",
+            "type": "boolean",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "status": {
+            "enum": [
+              "unresolved",
+              "resolved",
+              "ignored"
+            ],
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "title": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "culprit",
+          "level",
+          "status",
+          "count",
+          "firstSeen",
+          "lastSeen"
+        ],
+        "title": "Issue",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.Issue",
+        "x-validate": null
+      },
+      "IssueList": {
+        "items": {
+          "$ref": "#/components/schemas/Issue"
+        },
+        "title": "IssueList",
+        "type": "array",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.IssueList",
+        "x-validate": null
+      },
+      "IssueUpdateRequest": {
+        "properties": {
+          "status": {
+            "enum": [
+              "unresolved",
+              "resolved",
+              "ignored"
+            ],
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "IssueUpdateRequest",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.IssueUpdateRequest",
+        "x-validate": null
+      },
+      "LoginRequest": {
+        "properties": {
+          "email": {
+            "format": "email",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "password": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "LoginRequest",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.LoginRequest",
+        "x-validate": null
+      },
+      "Organization": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "name": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "slug": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "name"
+        ],
+        "title": "Organization",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.Organization",
+        "x-validate": null
+      },
+      "Project": {
+        "properties": {
+          "dsn": {
+            "description": "DSN первого активного ключа",
+            "nullable": true,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "events24h": {
+            "description": "События за последние 24 часа (в списке проектов)",
+            "nullable": true,
+            "type": "integer",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "id": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "name": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "platform": {
+            "nullable": true,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "slug": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "unresolvedIssues": {
+            "description": "Счётчик unresolved issues (в списке проектов)",
+            "nullable": true,
+            "type": "integer",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "name"
+        ],
+        "title": "Project",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.Project",
+        "x-validate": null
+      },
+      "ProjectCreateRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "platform": {
+            "nullable": true,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "slug": {
+            "pattern": "^[a-z0-9][a-z0-9-]*$",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "name",
+          "slug"
+        ],
+        "title": "ProjectCreateRequest",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.ProjectCreateRequest",
+        "x-validate": null
+      },
+      "ProjectUpdateRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "platform": {
+            "nullable": true,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "ProjectUpdateRequest",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.ProjectUpdateRequest",
+        "x-validate": null
+      },
+      "Release": {
+        "properties": {
+          "firstEventAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "id": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "newIssues": {
+            "description": "новых issues в релизе",
+            "nullable": true,
+            "type": "integer",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "ordinal": {
+            "description": "порядок в проекте (больше = новее)",
+            "type": "integer",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "version": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "ordinal"
+        ],
+        "title": "Release",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.Release",
+        "x-validate": null
+      },
+      "ReleaseDetail": {
+        "properties": {
+          "firstEventAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "id": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "newIssues": {
+            "items": {
+              "$ref": "#/components/schemas/Issue"
+            },
+            "type": "array",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "ordinal": {
+            "type": "integer",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "version": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "ordinal",
+          "newIssues"
+        ],
+        "title": "ReleaseDetail",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.ReleaseDetail",
+        "x-validate": null
+      },
+      "SetupRequest": {
+        "properties": {
+          "email": {
+            "format": "email",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "name": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "orgName": {
+            "default": "Swatter",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "orgSlug": {
+            "default": "swatter",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "password": {
+            "minLength": 8,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "SetupRequest",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.SetupRequest",
+        "x-validate": null
+      },
+      "SetupStatus": {
+        "properties": {
+          "setupRequired": {
+            "type": "boolean",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "setupRequired"
+        ],
+        "title": "SetupStatus",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.SetupStatus",
+        "x-validate": null
+      },
+      "TagEntry": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "value": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "title": "TagEntry",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.TagEntry",
+        "x-validate": null
+      }
+    }
+  },
+  "info": {
+    "description": "REST в стиле Sentry под /api/0/. Пагинация — keyset-курсор:\nпри наличии следующей страницы ответ несёт заголовок\n`Link: <url>; rel=\"next\"; results=\"true\"; cursor=\"...\"`.\nДо 1.0 контракт нестабилен.\n",
+    "title": "Swatter Dashboard API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/0/auth/login": {
+      "post": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.AuthController.login",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "description": "Учётные данные",
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentUser"
+                }
+              }
+            },
+            "description": "Текущий пользователь"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Неверные данные"
+          }
+        },
+        "summary": "Вход по email и паролю (устанавливает сессионный cookie)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/0/auth/logout": {
+      "post": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.AuthController.logout",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "Сессия завершена"
+          }
+        },
+        "summary": "Выход (ревокация сессионного токена)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/0/auth/me": {
+      "get": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.AuthController.me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentUser"
+                }
+              }
+            },
+            "description": "Пользователь"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Не аутентифицирован"
+          }
+        },
+        "summary": "Текущий пользователь и его организации",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/0/auth/setup": {
+      "get": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.AuthController.setup_status",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetupStatus"
+                }
+              }
+            },
+            "description": "Статус"
+          }
+        },
+        "summary": "Нужен ли первый запуск (в системе нет пользователей)",
+        "tags": [
+          "auth"
+        ]
+      },
+      "post": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.AuthController.setup",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetupRequest"
+              }
+            }
+          },
+          "description": "Данные владельца",
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentUser"
+                }
+              }
+            },
+            "description": "Созданный пользователь"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка валидации"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Система уже настроена"
+          }
+        },
+        "summary": "Первый запуск: создать owner-пользователя и организацию",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/0/issues/{issue_id}": {
+      "get": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.IssueController.show",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "issue_id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "x-struct": null,
+              "x-validate": null
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Issue"
+                }
+              }
+            },
+            "description": "Issue"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Не найден"
+          }
+        },
+        "summary": "Деталка issue",
+        "tags": [
+          "issues"
+        ]
+      },
+      "put": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.IssueController.update",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "issue_id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "x-struct": null,
+              "x-validate": null
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IssueUpdateRequest"
+              }
+            }
+          },
+          "description": "Новый статус",
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Issue"
+                }
+              }
+            },
+            "description": "Обновлённый issue"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Некорректный статус"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Не найден"
+          }
+        },
+        "summary": "Смена статуса (resolve / ignore / unresolve)",
+        "tags": [
+          "issues"
+        ]
+      }
+    },
+    "/api/0/issues/{issue_id}/events": {
+      "get": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.EventController.index",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "issue_id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "",
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "type": "integer",
+              "x-struct": null,
+              "x-validate": null
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventList"
+                }
+              }
+            },
+            "description": "События"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Некорректный курсор"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Issue не найден"
+          }
+        },
+        "summary": "События issue (новые сверху)",
+        "tags": [
+          "events"
+        ]
+      }
+    },
+    "/api/0/issues/{issue_id}/events/latest": {
+      "get": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.EventController.latest",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "issue_id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "x-struct": null,
+              "x-validate": null
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Event"
+                }
+              }
+            },
+            "description": "Событие"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Не найдено"
+          }
+        },
+        "summary": "Последнее событие issue (для деталки со стектрейсом)",
+        "tags": [
+          "events"
+        ]
+      }
+    },
+    "/api/0/organizations": {
+      "get": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.OrganizationController.index",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Organization"
+                  },
+                  "type": "array",
+                  "x-struct": null,
+                  "x-validate": null
+                }
+              }
+            },
+            "description": "Организации"
+          }
+        },
+        "summary": "Организации текущего пользователя",
+        "tags": [
+          "organizations"
+        ]
+      }
+    },
+    "/api/0/organizations/{org_slug}/projects": {
+      "get": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.ProjectController.index",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Project"
+                  },
+                  "type": "array",
+                  "x-struct": null,
+                  "x-validate": null
+                }
+              }
+            },
+            "description": "Проекты"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Организация не найдена"
+          }
+        },
+        "summary": "Проекты организации (с DSN и счётчиками)",
+        "tags": [
+          "projects"
+        ]
+      },
+      "post": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.ProjectController.create",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectCreateRequest"
+              }
+            }
+          },
+          "description": "Проект",
+          "required": false
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            },
+            "description": "Созданный проект"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка валидации"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Организация не найдена"
+          }
+        },
+        "summary": "Создать проект (сразу с DSN-ключом)",
+        "tags": [
+          "projects"
+        ]
+      }
+    },
+    "/api/0/projects/{org_slug}/{project_slug}": {
+      "put": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.ProjectController.update",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "",
+            "in": "path",
+            "name": "project_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectUpdateRequest"
+              }
+            }
+          },
+          "description": "Изменения",
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            },
+            "description": "Обновлённый проект"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка валидации"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Проект не найден"
+          }
+        },
+        "summary": "Переименовать проект (slug неизменяем)",
+        "tags": [
+          "projects"
+        ]
+      }
+    },
+    "/api/0/projects/{org_slug}/{project_slug}/artifacts": {
+      "post": {
+        "callbacks": {},
+        "description": "Поля формы: `file` (файл), `debug_id`, `type` (source_map |\nminified_source), опц. `name`. Идемпотентно по (project, debug_id,\ntype) — повтор заменяет.\n",
+        "operationId": "SwatterWeb.ArtifactController.create",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "",
+            "in": "path",
+            "name": "project_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "debug_id": {
+                    "type": "string",
+                    "x-struct": null,
+                    "x-validate": null
+                  },
+                  "file": {
+                    "format": "binary",
+                    "type": "string",
+                    "x-struct": null,
+                    "x-validate": null
+                  },
+                  "name": {
+                    "type": "string",
+                    "x-struct": null,
+                    "x-validate": null
+                  },
+                  "type": {
+                    "enum": [
+                      "source_map",
+                      "minified_source"
+                    ],
+                    "type": "string",
+                    "x-struct": null,
+                    "x-validate": null
+                  }
+                },
+                "required": [
+                  "file",
+                  "debug_id",
+                  "type"
+                ],
+                "type": "object",
+                "x-struct": null,
+                "x-validate": null
+              }
+            }
+          },
+          "description": "multipart-форма",
+          "required": false
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Artifact"
+                }
+              }
+            },
+            "description": "Загружено"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Некорректная форма"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Проект не найден"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Файл слишком большой"
+          }
+        },
+        "summary": "Загрузка sourcemap-артефакта (multipart, ADR-0012)",
+        "tags": [
+          "artifacts"
+        ]
+      }
+    },
+    "/api/0/projects/{org_slug}/{project_slug}/filters": {
+      "get": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.IssueController.filters",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "",
+            "in": "path",
+            "name": "project_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilterValues"
+                }
+              }
+            },
+            "description": "Значения фильтров"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Проект не найден"
+          }
+        },
+        "summary": "Доступные значения фильтров проекта (environment/release)",
+        "tags": [
+          "issues"
+        ]
+      }
+    },
+    "/api/0/projects/{org_slug}/{project_slug}/issues": {
+      "get": {
+        "callbacks": {},
+        "description": "Сортировки: date (last_seen), new (first_seen), freq (times_seen).",
+        "operationId": "SwatterWeb.IssueController.index",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "",
+            "in": "path",
+            "name": "project_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "",
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "default": "unresolved",
+              "enum": [
+                "unresolved",
+                "resolved",
+                "ignored",
+                "all"
+              ],
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "",
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "date",
+              "enum": [
+                "date",
+                "new",
+                "freq"
+              ],
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "Поиск по заголовку и culprit",
+            "in": "query",
+            "name": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "Фильтр по окружению событий",
+            "in": "query",
+            "name": "environment",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "Фильтр по релизу событий",
+            "in": "query",
+            "name": "release",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "Из Link-заголовка прошлого ответа",
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "type": "integer",
+              "x-struct": null,
+              "x-validate": null
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssueList"
+                }
+              }
+            },
+            "description": "Issues"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Некорректный курсор"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Проект не найден"
+          }
+        },
+        "summary": "Issues проекта",
+        "tags": [
+          "issues"
+        ]
+      }
+    },
+    "/api/0/projects/{org_slug}/{project_slug}/releases": {
+      "get": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.ReleaseController.index",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "",
+            "in": "path",
+            "name": "project_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Release"
+                  },
+                  "type": "array",
+                  "x-struct": null,
+                  "x-validate": null
+                }
+              }
+            },
+            "description": "Релизы"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Проект не найден"
+          }
+        },
+        "summary": "Релизы проекта (новые сверху) со счётчиком новых issues",
+        "tags": [
+          "releases"
+        ]
+      }
+    },
+    "/api/0/projects/{org_slug}/{project_slug}/releases/{version}": {
+      "get": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.ReleaseController.show",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "",
+            "in": "path",
+            "name": "project_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "",
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReleaseDetail"
+                }
+              }
+            },
+            "description": "Релиз с новыми issues"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Не найдено"
+          }
+        },
+        "summary": "Релиз и issues, впервые появившиеся в нём",
+        "tags": [
+          "releases"
+        ]
+      }
+    }
+  },
+  "security": [],
+  "servers": [
+    {
+      "url": "/",
+      "variables": {}
+    }
+  ],
+  "tags": []
+}

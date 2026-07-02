@@ -1,0 +1,647 @@
+:root {
+  --bg: #0d1117;
+  --panel: #151b23;
+  --panel-2: #1c2430;
+  --border: #2a3340;
+  --text: #e6edf3;
+  --muted: #8b98a9;
+  --accent: #7c5cff;
+  --accent-hover: #8f73ff;
+  --error: #f85149;
+  --warning: #d29922;
+  --info: #58a6ff;
+  --ok: #3fb950;
+
+  color-scheme: dark;
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0 0 0.4rem;
+  font-weight: 600;
+}
+
+h3 {
+  margin-top: 1.6rem;
+  font-size: 1rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 0.85rem;
+}
+
+.error-text {
+  color: var(--error);
+}
+
+/* layout */
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 1.4rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.header-left a.muted:hover {
+  color: var(--text);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.app-main {
+  flex: 1;
+  width: 100%;
+}
+
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.4rem;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin: 0.6rem 0 1rem;
+}
+
+.screen-center {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.brand::before {
+  content: "▞ ";
+  color: var(--accent);
+}
+
+.brand.big {
+  font-size: 1.6rem;
+}
+
+/* cards & forms */
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+}
+
+.auth-card {
+  width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1.6rem;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+input,
+.select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text);
+  padding: 0.5rem 0.7rem;
+  font: inherit;
+}
+
+input:focus,
+.select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.btn {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text);
+  padding: 0.45rem 0.9rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.btn:hover {
+  border-color: var(--muted);
+}
+
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.btn.primary:hover {
+  background: var(--accent-hover);
+}
+
+.btn.wide {
+  width: 100%;
+  margin-top: 0.8rem;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* toolbar */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.tabs {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.tab {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  padding: 0.4rem 0.8rem;
+  font: inherit;
+  cursor: pointer;
+  text-transform: capitalize;
+}
+
+.tab.active {
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+/* filter bar */
+
+.filter-bar {
+  display: flex;
+  gap: 0.7rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* issues list */
+
+.issue-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.issue-list li + li {
+  border-top: 1px solid var(--border);
+}
+
+.issue-row {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.7rem 1rem;
+  background: var(--panel);
+}
+
+.issue-row:hover {
+  background: var(--panel-2);
+}
+
+.issue-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.issue-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.issue-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+}
+
+.count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+/* event history rows */
+
+.event-row {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  width: 100%;
+  padding: 0.55rem 1rem;
+  background: var(--panel);
+  border: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.event-row:hover {
+  background: var(--panel-2);
+}
+
+.event-row.active {
+  background: var(--panel-2);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.event-id {
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  color: var(--accent-hover);
+}
+
+.event-row .muted:nth-of-type(1) {
+  flex: 1;
+}
+
+/* badges */
+
+.badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 5px;
+  padding: 0.15rem 0.45rem;
+  flex-shrink: 0;
+}
+
+.level-error,
+.level-fatal {
+  background: rgb(248 81 73 / 15%);
+  color: var(--error);
+}
+
+.level-warning {
+  background: rgb(210 153 34 / 15%);
+  color: var(--warning);
+}
+
+.level-info,
+.level-debug {
+  background: rgb(88 166 255 / 15%);
+  color: var(--info);
+}
+
+.badge.regressed {
+  background: rgb(248 81 73 / 15%);
+  color: var(--error);
+  margin-left: 0.5rem;
+}
+
+.badge.symbolicated {
+  background: rgb(63 185 80 / 15%);
+  color: var(--ok);
+  margin-left: 0.5rem;
+  text-transform: none;
+}
+
+/* empty state & snippets */
+
+.empty-state {
+  margin-top: 1rem;
+  text-align: center;
+  padding: 2.2rem;
+}
+
+.snippet,
+.code-context {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  overflow-x: auto;
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.85rem;
+  text-align: left;
+  white-space: pre;
+}
+
+/* issue detail */
+
+.issue-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.8rem;
+  margin-bottom: 0.6rem;
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.stacktrace {
+  padding: 0.4rem 0;
+}
+
+.exception-line {
+  margin: 0.4rem 1rem 0.6rem;
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.9rem;
+}
+
+.frame {
+  border-top: 1px solid var(--border);
+  padding: 0.45rem 1rem;
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.frame-app {
+  color: var(--text);
+}
+
+.frame summary {
+  cursor: pointer;
+}
+
+.frame-module.in-app {
+  color: var(--accent-hover);
+  font-weight: 600;
+}
+
+.frame-fn {
+  font-weight: 500;
+}
+
+.code-context {
+  margin: 0.6rem 0 0.2rem;
+  padding: 0.4rem 0;
+}
+
+.code-line {
+  padding: 0 1rem;
+  min-height: 1.2em;
+}
+
+.code-line.highlight {
+  background: rgb(124 92 255 / 18%);
+  border-left: 3px solid var(--accent);
+}
+
+/* releases page */
+
+.releases-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 1.4rem;
+  align-items: start;
+}
+
+.release-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.release-list li + li {
+  border-top: 1px solid var(--border);
+}
+
+.release-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.6rem 0.9rem;
+  background: var(--panel);
+  border: none;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.release-row:hover {
+  background: var(--panel-2);
+}
+
+.release-row.active {
+  background: var(--panel-2);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.release-version {
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.release-heading {
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 1.1rem;
+  color: var(--text);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+/* projects page */
+
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1rem;
+}
+
+.project-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.project-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.project-name {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--text);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.rename-row {
+  display: flex;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.rename-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.small-btn {
+  padding: 0.2rem 0.6rem;
+  font-size: 0.82rem;
+}
+
+.project-stats {
+  display: flex;
+  gap: 2rem;
+}
+
+.dsn-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dsn {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
+}
+
+.project-select {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* tags & breadcrumbs */
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.85rem;
+}
+
+.breadcrumbs {
+  list-style: none;
+  margin: 0;
+  padding: 0.4rem 1rem;
+}
+
+.breadcrumbs li {
+  display: flex;
+  gap: 0.8rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px dashed var(--border);
+}
+
+.breadcrumbs li:last-child {
+  border-bottom: none;
+}

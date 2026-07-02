@@ -1,0 +1,8 @@
+{
+  "name": "swatter-conformance-node",
+  "private": true,
+  "type": "commonjs",
+  "dependencies": {
+    "@sentry/node": "*"
+  }
+}

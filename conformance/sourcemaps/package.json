@@ -1,0 +1,12 @@
+{
+  "name": "swatter-conformance-sourcemaps",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@sentry/node": "*"
+  },
+  "devDependencies": {
+    "esbuild": "*",
+    "@sentry/esbuild-plugin": "*"
+  }
+}

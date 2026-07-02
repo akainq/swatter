@@ -1,0 +1,7 @@
+{
+  "name": "swatter-conformance-bun",
+  "private": true,
+  "dependencies": {
+    "@sentry/bun": "*"
+  }
+}

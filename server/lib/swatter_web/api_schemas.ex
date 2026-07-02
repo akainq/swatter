@@ -1,0 +1,313 @@
+defmodule SwatterWeb.ApiSchemas do
+  @moduledoc "OpenAPI-схемы ответов dashboard API (ADR-0008)."
+
+  alias OpenApiSpex.Schema
+
+  require OpenApiSpex
+
+  defmodule Organization do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "Organization",
+      type: :object,
+      properties: %{
+        id: %Schema{type: :string},
+        slug: %Schema{type: :string},
+        name: %Schema{type: :string}
+      },
+      required: [:id, :slug, :name]
+    })
+  end
+
+  defmodule Project do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "Project",
+      type: :object,
+      properties: %{
+        id: %Schema{type: :string},
+        slug: %Schema{type: :string},
+        name: %Schema{type: :string},
+        platform: %Schema{type: :string, nullable: true},
+        dsn: %Schema{type: :string, nullable: true, description: "DSN первого активного ключа"},
+        unresolvedIssues: %Schema{
+          type: :integer,
+          nullable: true,
+          description: "Счётчик unresolved issues (в списке проектов)"
+        },
+        events24h: %Schema{
+          type: :integer,
+          nullable: true,
+          description: "События за последние 24 часа (в списке проектов)"
+        }
+      },
+      required: [:id, :slug, :name]
+    })
+  end
+
+  defmodule Artifact do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "Artifact",
+      type: :object,
+      properties: %{
+        id: %Schema{type: :string},
+        debugId: %Schema{type: :string},
+        type: %Schema{type: :string, enum: ["source_map", "minified_source"]},
+        name: %Schema{type: :string, nullable: true},
+        size: %Schema{type: :integer, description: "размер распакованного контента"}
+      },
+      required: [:id, :debugId, :type, :size]
+    })
+  end
+
+  defmodule Release do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "Release",
+      type: :object,
+      properties: %{
+        id: %Schema{type: :string},
+        version: %Schema{type: :string},
+        ordinal: %Schema{type: :integer, description: "порядок в проекте (больше = новее)"},
+        firstEventAt: %Schema{type: :string, format: :"date-time", nullable: true},
+        newIssues: %Schema{type: :integer, nullable: true, description: "новых issues в релизе"}
+      },
+      required: [:id, :version, :ordinal]
+    })
+  end
+
+  defmodule ReleaseDetail do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "ReleaseDetail",
+      type: :object,
+      properties: %{
+        id: %Schema{type: :string},
+        version: %Schema{type: :string},
+        ordinal: %Schema{type: :integer},
+        firstEventAt: %Schema{type: :string, format: :"date-time", nullable: true},
+        newIssues: %Schema{type: :array, items: SwatterWeb.ApiSchemas.Issue}
+      },
+      required: [:id, :version, :ordinal, :newIssues]
+    })
+  end
+
+  defmodule FilterValues do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "FilterValues",
+      type: :object,
+      properties: %{
+        environments: %Schema{type: :array, items: %Schema{type: :string}},
+        releases: %Schema{type: :array, items: %Schema{type: :string}}
+      },
+      required: [:environments, :releases]
+    })
+  end
+
+  defmodule ProjectUpdateRequest do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "ProjectUpdateRequest",
+      type: :object,
+      properties: %{
+        name: %Schema{type: :string},
+        platform: %Schema{type: :string, nullable: true}
+      },
+      required: [:name]
+    })
+  end
+
+  defmodule Issue do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "Issue",
+      type: :object,
+      properties: %{
+        id: %Schema{type: :string},
+        title: %Schema{type: :string},
+        culprit: %Schema{type: :string},
+        level: %Schema{type: :string, enum: ["fatal", "error", "warning", "info", "debug"]},
+        status: %Schema{type: :string, enum: ["unresolved", "resolved", "ignored"]},
+        count: %Schema{type: :integer, description: "times_seen"},
+        regressed: %Schema{type: :boolean, description: "вернулся в релизе новее закрытия"},
+        firstSeen: %Schema{type: :string, format: :"date-time"},
+        lastSeen: %Schema{type: :string, format: :"date-time"},
+        project: %Schema{
+          type: :object,
+          nullable: true,
+          properties: %{id: %Schema{type: :string}, slug: %Schema{type: :string}}
+        }
+      },
+      required: [:id, :title, :culprit, :level, :status, :count, :firstSeen, :lastSeen]
+    })
+  end
+
+  defmodule IssueList do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "IssueList",
+      type: :array,
+      items: SwatterWeb.ApiSchemas.Issue
+    })
+  end
+
+  defmodule IssueUpdateRequest do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "IssueUpdateRequest",
+      type: :object,
+      properties: %{
+        status: %Schema{type: :string, enum: ["unresolved", "resolved", "ignored"]}
+      },
+      required: [:status]
+    })
+  end
+
+  defmodule TagEntry do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "TagEntry",
+      type: :object,
+      properties: %{key: %Schema{type: :string}, value: %Schema{type: :string}},
+      required: [:key, :value]
+    })
+  end
+
+  defmodule Event do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "Event",
+      type: :object,
+      properties: %{
+        eventId: %Schema{type: :string},
+        timestamp: %Schema{type: :string, format: :"date-time"},
+        dateReceived: %Schema{type: :string, format: :"date-time"},
+        level: %Schema{type: :string},
+        message: %Schema{type: :string},
+        platform: %Schema{type: :string},
+        release: %Schema{type: :string},
+        environment: %Schema{type: :string},
+        traceId: %Schema{type: :string},
+        sdk: %Schema{
+          type: :object,
+          properties: %{name: %Schema{type: :string}, version: %Schema{type: :string}}
+        },
+        user: %Schema{
+          type: :object,
+          properties: %{
+            id: %Schema{type: :string},
+            email: %Schema{type: :string},
+            ipAddress: %Schema{type: :string}
+          }
+        },
+        tags: %Schema{type: :array, items: SwatterWeb.ApiSchemas.TagEntry},
+        exception: %Schema{
+          nullable: true,
+          description: "Структура exception из исходного события (values/stacktrace/frames)"
+        },
+        breadcrumbs: %Schema{nullable: true, description: "breadcrumbs из исходного события"},
+        contexts: %Schema{nullable: true, description: "contexts из исходного события"}
+      },
+      required: [:eventId, :timestamp, :level]
+    })
+  end
+
+  defmodule EventList do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "EventList",
+      type: :array,
+      items: SwatterWeb.ApiSchemas.Event
+    })
+  end
+
+  defmodule Error do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "Error",
+      type: :object,
+      properties: %{detail: %Schema{type: :string}},
+      required: [:detail]
+    })
+  end
+
+  defmodule ProjectCreateRequest do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "ProjectCreateRequest",
+      type: :object,
+      properties: %{
+        name: %Schema{type: :string},
+        slug: %Schema{type: :string, pattern: "^[a-z0-9][a-z0-9-]*$"},
+        platform: %Schema{type: :string, nullable: true}
+      },
+      required: [:name, :slug]
+    })
+  end
+
+  defmodule SetupStatus do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "SetupStatus",
+      type: :object,
+      properties: %{setupRequired: %Schema{type: :boolean}},
+      required: [:setupRequired]
+    })
+  end
+
+  defmodule SetupRequest do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "SetupRequest",
+      type: :object,
+      properties: %{
+        email: %Schema{type: :string, format: :email},
+        password: %Schema{type: :string, minLength: 8},
+        name: %Schema{type: :string},
+        orgName: %Schema{type: :string, default: "Swatter"},
+        orgSlug: %Schema{type: :string, default: "swatter"}
+      },
+      required: [:email, :password]
+    })
+  end
+
+  defmodule LoginRequest do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "LoginRequest",
+      type: :object,
+      properties: %{
+        email: %Schema{type: :string, format: :email},
+        password: %Schema{type: :string}
+      },
+      required: [:email, :password]
+    })
+  end
+
+  defmodule CurrentUser do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "CurrentUser",
+      type: :object,
+      properties: %{
+        id: %Schema{type: :string},
+        email: %Schema{type: :string},
+        name: %Schema{type: :string},
+        memberships: %Schema{
+          type: :array,
+          items: %Schema{
+            type: :object,
+            properties: %{
+              role: %Schema{type: :string, enum: ["owner", "admin", "member"]},
+              organization: SwatterWeb.ApiSchemas.Organization
+            },
+            required: [:role, :organization]
+          }
+        }
+      },
+      required: [:id, :email, :memberships]
+    })
+  end
+end

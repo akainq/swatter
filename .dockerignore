@@ -1,0 +1,24 @@
+# git и dev-мусор — не попадают в build context
+.git
+.github
+.claude
+docs
+conformance
+
+# elixir
+server/_build
+server/deps
+server/erl_crash.dump
+server/.elixir_ls
+server/.lexical
+
+# web
+web/node_modules
+web/dist
+
+# локальное
+.env
+.env.*
+compose.yaml
+Thumbs.db
+.DS_Store
