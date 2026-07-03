@@ -40,7 +40,7 @@ defmodule Swatter.Pipeline.Normalizer do
       user_id: str(get_in(event, ["user", "id"])),
       user_email: str(get_in(event, ["user", "email"])),
       user_ip: str(get_in(event, ["user", "ip_address"])),
-      tags: normalize_tags(event["tags"]),
+      tags: event["tags"] |> normalize_tags() |> promote_server_name(event),
       trace_id: str(get_in(event, ["contexts", "trace", "trace_id"])),
       fingerprint_hash: Fingerprint.compute(event),
       grouping_version: Fingerprint.grouping_version(),
@@ -169,6 +169,16 @@ defmodule Swatter.Pipeline.Normalizer do
   end
 
   defp normalize_tags(_), do: %{}
+
+  # server_name — top-level атрибут протокола (хост, где случилась ошибка);
+  # продвигаем в теги, как это делает Sentry: виден в UI, истории и алертах.
+  # Явно заданный SDK-тег с тем же ключом имеет приоритет.
+  defp promote_server_name(tags, event) do
+    case str(event["server_name"]) do
+      "" -> tags
+      host -> Map.put_new(tags, "server_name", truncate(host, 200))
+    end
+  end
 
   defp tag_value(nil), do: ""
   defp tag_value(v) when is_binary(v), do: truncate(v, 200)

@@ -15,14 +15,20 @@ defmodule Swatter.Alerts.NotifyWorker do
   alias Swatter.Issues
 
   @impl Oban.Worker
-  def perform(%Oban.Job{args: %{"issue_id" => issue_id, "rule" => rule}}) do
+  def perform(%Oban.Job{args: %{"issue_id" => issue_id, "rule" => rule} = args}) do
     issue = Issues.get_issue(issue_id)
     settings = issue && Alerts.get_settings(issue.project_id)
 
     cond do
-      is_nil(issue) -> :ok
-      not Alerts.telegram_ready?(settings) -> :ok
-      true -> deliver(settings.telegram_chat_id, Message.build(issue, rule))
+      is_nil(issue) ->
+        :ok
+
+      not Alerts.telegram_ready?(settings) ->
+        :ok
+
+      true ->
+        text = Message.build(issue, rule, host: args["host"])
+        deliver(settings.telegram_chat_id, text)
     end
   end
 

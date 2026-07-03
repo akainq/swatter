@@ -35,25 +35,27 @@ defmodule Swatter.Alerts do
   end
 
   @doc """
-  Вызывается пайплайном на каждое персистнутое событие. По кэшированным
-  настройкам проверяет правила new/regression и порог частоты, ставит
-  Oban-джобы доставки. Тяжёлого — ничего: ETS-чтение + (при настроенном
-  правиле) Redis + быстрый `Oban.insert`.
+  Вызывается пайплайном на каждое персистнутое событие (`normalized` — его
+  нормализованная форма; хост из тега `server_name` попадает в текст алерта).
+  По кэшированным настройкам проверяет правила new/regression и порог
+  частоты, ставит Oban-джобы доставки. Тяжёлого — ничего: ETS-чтение +
+  (при настроенном правиле) Redis + быстрый `Oban.insert`.
   """
-  def on_event(%Issue{} = issue) do
+  def on_event(%Issue{} = issue, normalized \\ nil) do
     settings = SettingsCache.get(issue.project_id)
-    notify_event_kind(issue, settings)
-    notify_frequency(issue, settings)
+    host = normalized && normalized.tags["server_name"]
+    notify_event_kind(issue, settings, host)
+    notify_frequency(issue, settings, host)
     :ok
   end
 
-  @doc "Только правила new/regression по `event_kind` (подмножество `on_event/1`)."
+  @doc "Только правила new/regression по `event_kind` (подмножество `on_event/2`)."
   def maybe_notify(%Issue{} = issue) do
-    notify_event_kind(issue, SettingsCache.get(issue.project_id))
+    notify_event_kind(issue, SettingsCache.get(issue.project_id), nil)
     :ok
   end
 
-  defp notify_event_kind(%Issue{event_kind: kind} = issue, settings)
+  defp notify_event_kind(%Issue{event_kind: kind} = issue, settings, host)
        when kind in ["new", "regression"] do
     rule = if kind == "new", do: "new_issue", else: "regression"
 
@@ -62,30 +64,34 @@ defmodule Swatter.Alerts do
         (kind == "regression" and settings.on_regression)
 
     if enabled? and telegram_ready?(settings) and acquire_cooldown(issue.id, rule) do
-      enqueue(issue.id, rule)
+      enqueue(issue.id, rule, host)
     end
 
     :ok
   end
 
-  defp notify_event_kind(_issue, _settings), do: :ok
+  defp notify_event_kind(_issue, _settings, _host), do: :ok
 
   # порог частоты: N событий по issue за окно T. Fixed window в Redis; алерт
   # ровно на пороговом событии (`== threshold`, INCR атомарен), cooldown —
   # чтобы после сброса окна не спамило.
-  defp notify_frequency(%Issue{} = issue, %Settings{frequency_threshold: threshold} = settings)
+  defp notify_frequency(
+         %Issue{} = issue,
+         %Settings{frequency_threshold: threshold} = settings,
+         host
+       )
        when is_integer(threshold) and threshold > 0 do
     window = settings.frequency_window_seconds || 300
 
     if telegram_ready?(settings) and incr_frequency(issue.id, window) == threshold and
          acquire_cooldown(issue.id, "frequency") do
-      enqueue(issue.id, "frequency")
+      enqueue(issue.id, "frequency", host)
     end
 
     :ok
   end
 
-  defp notify_frequency(_issue, _settings), do: :ok
+  defp notify_frequency(_issue, _settings, _host), do: :ok
 
   @doc """
   Готов ли Telegram-канал: есть общий bot-token, у проекта включены алерты и
@@ -102,8 +108,10 @@ defmodule Swatter.Alerts do
   @doc "Общий bot-token инстанса (ADR-0013) или nil."
   def bot_token, do: alerts_config()[:telegram_bot_token]
 
-  defp enqueue(issue_id, rule) do
-    %{issue_id: issue_id, rule: rule} |> NotifyWorker.new() |> Oban.insert()
+  defp enqueue(issue_id, rule, host) do
+    args = %{issue_id: issue_id, rule: rule}
+    args = if host in [nil, ""], do: args, else: Map.put(args, :host, host)
+    args |> NotifyWorker.new() |> Oban.insert()
   end
 
   # частотный счётчик: fixed window в Redis (INCR + EXPIRE), паттерн ADR-0009.

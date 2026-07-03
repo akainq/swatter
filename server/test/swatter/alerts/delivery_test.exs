@@ -161,6 +161,25 @@ defmodule Swatter.Alerts.DeliveryTest do
       refute_enqueued(worker: NotifyWorker)
     end
 
+    test "хост из тега server_name попадает в args джобы", %{prev: prev} do
+      with_token(prev)
+      {project, _} = project_fixture()
+      {:ok, _} = Alerts.upsert_settings(project.id, %{telegram_chat_id: "-100"})
+      Swatter.Alerts.SettingsCache.clear()
+
+      normalized = Map.put(norm(nil), :tags, %{"server_name" => "web-01"})
+
+      {:ok, issue} =
+        Issues.upsert_from_event(normalized, project.organization_id, project.id)
+
+      Alerts.on_event(issue, normalized)
+
+      assert_enqueued(
+        worker: NotifyWorker,
+        args: %{"issue_id" => issue.id, "rule" => "new_issue", "host" => "web-01"}
+      )
+    end
+
     test "ongoing (повтор того же fingerprint) → нет джобы", %{prev: prev} do
       with_token(prev)
       {project, _} = project_fixture()

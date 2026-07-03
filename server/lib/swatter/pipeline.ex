@@ -129,7 +129,7 @@ defmodule Swatter.Pipeline do
 
         # алерты (ADR-0013): правила new/regression + порог частоты; ставит
         # быстрый Oban.insert, тяжёлый HTTP уходит в воркер (инвариант приёма)
-        Swatter.Alerts.on_event(issue)
+        Swatter.Alerts.on_event(issue, normalized)
 
         [build_row(normalized, issue, project)]
 

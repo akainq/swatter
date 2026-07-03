@@ -13,8 +13,8 @@ defmodule Swatter.Alerts.Message do
   }
 
   @doc """
-  Собирает текст сообщения. `opts[:ai_summary]` — краткое AI-резюме (ADR-0016),
-  вставляется строкой, если передано.
+  Собирает текст сообщения. `opts[:host]` — хост события (тег `server_name`),
+  `opts[:ai_summary]` — краткое AI-резюме (ADR-0016); обе строки опциональны.
   """
   def build(%Issue{} = issue, rule, opts \\ []) do
     header = Map.get(@headers, rule, "⚠️ Алерт")
@@ -25,6 +25,7 @@ defmodule Swatter.Alerts.Message do
       issue.title,
       cline("at ", issue.culprit),
       "level: #{issue.level} · seen ×#{issue.times_seen}",
+      cline("host: ", opts[:host]),
       cline("🤖 ", opts[:ai_summary]),
       issue_url(issue)
     ]

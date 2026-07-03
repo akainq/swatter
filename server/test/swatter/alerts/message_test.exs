@@ -36,6 +36,19 @@ defmodule Swatter.Alerts.MessageTest do
     assert text =~ "nil pointer in checkout"
   end
 
+  test "хост события (server_name) попадает в сообщение, без него строки нет" do
+    {project, _} = project_fixture()
+
+    {:ok, issue} =
+      Issues.upsert_from_event(norm("Boom", "Mod.fun"), project.organization_id, project.id)
+
+    issue = Issues.get_issue(issue.id)
+
+    # ^host: с якорем начала строки — в URL внизу сообщения есть "localhost:"
+    assert Message.build(issue, "new_issue", host: "web-01") =~ ~r/^host: web-01$/m
+    refute Message.build(issue, "new_issue") =~ ~r/^host: /m
+  end
+
   defp norm(title, culprit) do
     now = DateTime.utc_now()
 

@@ -25,12 +25,29 @@ defmodule Swatter.Pipeline.NormalizerTest do
     assert n.user_email == "dev@example.com"
     assert n.user_ip == "127.0.0.1"
     assert n.trace_id == "4541246aa98542e4980c637cd76e4b1a"
-    assert n.tags == %{"feature" => "checkout", "shard" => "7"}
+
+    # server_name — top-level атрибут протокола, продвигается в теги
+    assert n.tags == %{"feature" => "checkout", "shard" => "7", "server_name" => "testhost"}
     assert n.fingerprint_hash =~ ~r/^[0-9a-f]{64}$/
     assert n.grouping_version == 1
     assert %DateTime{} = n.timestamp
     assert DateTime.to_unix(n.timestamp, :millisecond) == 1_782_992_354_448
     assert Jason.decode!(n.payload)["event_id"] == n.event_id
+  end
+
+  test "явный SDK-тег server_name не перетирается top-level атрибутом" do
+    event =
+      bun_event()
+      |> Map.put("server_name", "top-level-host")
+      |> Map.update!("tags", &Map.put(&1, "server_name", "tag-host"))
+
+    n = Normalizer.normalize(event, @received_at)
+    assert n.tags["server_name"] == "tag-host"
+  end
+
+  test "событие без server_name не получает пустого тега" do
+    n = Normalizer.normalize(Map.delete(bun_event(), "server_name"), @received_at)
+    refute Map.has_key?(n.tags, "server_name")
   end
 
   test "exception голым списком (форма sentry-go) нормализуется" do
