@@ -888,3 +888,8 @@ input:focus,
   background: color-mix(in srgb, var(--info) 25%, transparent);
   color: var(--info);
 }
+
+.badge.trace-error {
+  background: color-mix(in srgb, var(--error) 25%, transparent);
+  color: var(--error);
+}

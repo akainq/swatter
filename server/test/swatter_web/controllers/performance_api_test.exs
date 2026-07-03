@@ -11,10 +11,42 @@ defmodule SwatterWeb.PerformanceApiTest do
 
   setup %{conn: conn} do
     EventsRepo.query!("TRUNCATE TABLE spans")
+    EventsRepo.query!("TRUNCATE TABLE events")
     {project, _key} = project_fixture()
     org = Swatter.Repo.get!(Swatter.Projects.Organization, project.organization_id)
     user = member_fixture(org)
     %{conn: log_in_user(conn, user), org: org, project: project}
+  end
+
+  defp insert_error!(project, trace_id, opts \\ []) do
+    at = Keyword.get(opts, :at, DateTime.utc_now())
+
+    EventsRepo.insert_all(Swatter.Events.Event, [
+      %{
+        org_id: project.organization_id,
+        project_id: project.id,
+        issue_id: Keyword.get(opts, :issue_id, 111),
+        event_id: random_hex(32),
+        timestamp: at,
+        received_at: at,
+        level: "error",
+        message: "",
+        exception_type: Keyword.get(opts, :type, "PaymentError"),
+        exception_value: "boom",
+        culprit: "",
+        release: "",
+        environment: "production",
+        platform: "node",
+        sdk_name: "",
+        sdk_version: "",
+        user_id: "",
+        user_email: "",
+        user_ip: "",
+        tags: %{},
+        trace_id: trace_id,
+        payload: "{}"
+      }
+    ])
   end
 
   defp insert_segment!(project, name, duration_ms, opts \\ []) do
@@ -178,5 +210,36 @@ defmodule SwatterWeb.PerformanceApiTest do
     # несуществующий трейс — 404
     empty = get(conn, "/api/0/organizations/#{org.slug}/traces/#{random_hex(32)}")
     assert json_response(empty, 404)
+  end
+
+  test "ошибки трейса: в ответе trace и на /errors, кросс-проектно", %{
+    conn: conn,
+    org: org,
+    project: project
+  } do
+    trace_id = random_hex(32)
+    insert_segment!(project, "GET /checkout", 100, trace_id: trace_id)
+
+    {backend, _} = project_fixture(org)
+    insert_error!(backend, trace_id, issue_id: 42)
+    # ошибка другого трейса не попадает
+    insert_error!(project, random_hex(32))
+
+    body =
+      conn |> get("/api/0/organizations/#{org.slug}/traces/#{trace_id}") |> json_response(200)
+
+    assert_schema(body, "Trace", api_spec())
+    assert [error] = body["errors"]
+    assert error["title"] == "PaymentError: boom"
+    assert error["issueId"] == "42"
+    assert error["projectSlug"] == backend.slug
+
+    errors =
+      conn
+      |> get("/api/0/organizations/#{org.slug}/traces/#{trace_id}/errors")
+      |> json_response(200)
+
+    assert_schema(errors, "RelatedErrorList", api_spec())
+    assert length(errors) == 1
   end
 end

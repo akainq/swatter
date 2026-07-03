@@ -89,13 +89,38 @@ defmodule SwatterWeb.PerformanceController do
          [_ | _] = spans <- Spans.trace_spans(org.id, normalize_trace_id(trace_id)) do
       # слаги проектов — для кросс-сервисных бейджей в waterfall (PG, не JOIN в CH)
       slugs = org |> Projects.list_projects() |> Map.new(&{&1.id, &1.slug})
+      errors = Swatter.Events.related_by_trace(org.id, normalize_trace_id(trace_id))
 
       json(conn, %{
         "traceId" => normalize_trace_id(trace_id),
-        "spans" => Enum.map(spans, &Serializer.trace_span(&1, slugs))
+        "spans" => Enum.map(spans, &Serializer.trace_span(&1, slugs)),
+        "errors" => Enum.map(errors, &Serializer.related_error(&1, slugs))
       })
     else
       _ -> conn |> put_status(404) |> json(%{detail: "trace not found"})
+    end
+  end
+
+  operation(:trace_errors,
+    summary: "Ошибки трейса по организации (кросс-сервисная связка, ADR-0014)",
+    parameters: [
+      org_slug: [in: :path, type: :string, required: true],
+      trace_id: [in: :path, type: :string, required: true]
+    ],
+    responses: [
+      ok: {"Ошибки трейса", "application/json", ApiSchemas.RelatedErrorList},
+      not_found: {"Организация не найдена", "application/json", ApiSchemas.Error}
+    ]
+  )
+
+  def trace_errors(conn, %{"org_slug" => org_slug, "trace_id" => trace_id}) do
+    with org when not is_nil(org) <- Projects.get_organization_by_slug(org_slug),
+         true <- Swatter.Accounts.member?(conn.assigns.current_user, org.id) do
+      slugs = org |> Projects.list_projects() |> Map.new(&{&1.id, &1.slug})
+      errors = Swatter.Events.related_by_trace(org.id, normalize_trace_id(trace_id))
+      json(conn, Enum.map(errors, &Serializer.related_error(&1, slugs)))
+    else
+      _ -> conn |> put_status(404) |> json(%{detail: "organization not found"})
     end
   end
 

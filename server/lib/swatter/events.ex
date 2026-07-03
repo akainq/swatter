@@ -64,6 +64,31 @@ defmodule Swatter.Events do
   defp presence(""), do: nil
   defp presence(value) when is_binary(value), do: value
 
+  @related_limit 100
+
+  @doc """
+  Ошибки с этим `trace_id` по всем проектам организации (ADR-0014):
+  кросс-сервисная связка фронт↔бэк↔микросервисы. Новые сверху.
+  """
+  def related_by_trace(org_id, trace_id) do
+    EventsRepo.all(
+      from e in Event,
+        where: e.org_id == ^org_id and e.trace_id == ^trace_id and e.trace_id != "",
+        order_by: [desc: e.timestamp],
+        limit: @related_limit,
+        select: %{
+          event_id: e.event_id,
+          issue_id: e.issue_id,
+          project_id: e.project_id,
+          timestamp: e.timestamp,
+          level: e.level,
+          exception_type: e.exception_type,
+          exception_value: e.exception_value,
+          message: e.message
+        }
+    )
+  end
+
   def latest_event(issue_id) do
     Event
     |> where(issue_id: ^issue_id)

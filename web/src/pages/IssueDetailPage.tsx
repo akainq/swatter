@@ -6,9 +6,10 @@ import {
   fetchIssue,
   fetchIssueEvents,
   fetchLatestEvent,
+  fetchTraceErrors,
   updateIssueStatus,
 } from "../api/client";
-import type { Issue, IssueEvent } from "../api/client";
+import type { Issue, IssueEvent, RelatedError } from "../api/client";
 import LevelBadge from "../components/LevelBadge";
 import { formatDateTime, timeAgo } from "../lib/time";
 
@@ -164,6 +165,10 @@ export default function IssueDetailPage() {
 
       <AIPanel issue={issue} issueId={issueId} onIssue={setIssue} />
 
+      {shown?.traceId && (
+        <TraceSection orgSlug={orgSlug} traceId={shown.traceId} currentIssueId={issueId} />
+      )}
+
       {shown?.message && (
         <section>
           <h3>Message</h3>
@@ -250,6 +255,71 @@ export default function IssueDetailPage() {
         </section>
       )}
     </div>
+  );
+}
+
+// Связка error↔trace (ADR-0014): ссылка в waterfall + ошибки других
+// сервисов из того же трейса (кросс-проектно по trace_id)
+function TraceSection({
+  orgSlug,
+  traceId,
+  currentIssueId,
+}: {
+  orgSlug: string;
+  traceId: string;
+  currentIssueId: string;
+}) {
+  const [related, setRelated] = useState<RelatedError[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setRelated([]);
+    fetchTraceErrors(orgSlug, traceId)
+      .then((list) => {
+        if (!cancelled) setRelated(list.filter((e) => e.issueId !== currentIssueId));
+      })
+      .catch(() => {
+        // связанные ошибки — best-effort, страница живёт и без них
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [orgSlug, traceId, currentIssueId]);
+
+  return (
+    <section>
+      <h3>Trace</h3>
+      <div className="card ai-panel">
+        <p>
+          <code className="event-id">{traceId.slice(0, 16)}</code>{" "}
+          <Link to={`/${orgSlug}/traces/${traceId}`} className="btn small-btn">
+            View trace
+          </Link>
+        </p>
+        {related.length > 0 && (
+          <>
+            <p className="muted small">Related errors in this trace (other services):</p>
+            <ul className="issue-list">
+              {related.map((err) => (
+                <li key={err.eventId}>
+                  <Link
+                    to={`/${orgSlug}/${err.projectSlug ?? ""}/issues/${err.issueId}`}
+                    className="issue-row"
+                  >
+                    <LevelBadge level={err.level} />
+                    <span className="issue-title">{err.title}</span>
+                    {err.projectSlug && (
+                      <span className="badge project-badge">{err.projectSlug}</span>
+                    )}
+                    <span className="muted small">{timeAgo(err.timestamp)}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
+    </section>
   );
 }
 

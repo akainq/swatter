@@ -16,6 +16,7 @@ export type TransactionStat = components["schemas"]["TransactionStat"];
 export type TraceSummary = components["schemas"]["TraceSummary"];
 export type Trace = components["schemas"]["Trace"];
 export type TraceSpan = components["schemas"]["TraceSpan"];
+export type RelatedError = components["schemas"]["RelatedError"];
 export type AlertSettings = components["schemas"]["AlertSettings"];
 export type AlertSettingsUpdate = components["schemas"]["AlertSettingsUpdateRequest"];
 
@@ -166,6 +167,10 @@ export const fetchTransactionTraces = (
 
 export const fetchTrace = (orgSlug: string, traceId: string) =>
   api<Trace>(`/api/0/organizations/${orgSlug}/traces/${traceId}`);
+
+// кросс-сервисная связка ошибок по trace_id (ADR-0014)
+export const fetchTraceErrors = (orgSlug: string, traceId: string) =>
+  api<RelatedError[]>(`/api/0/organizations/${orgSlug}/traces/${traceId}/errors`);
 
 export const fetchAlertSettings = (orgSlug: string, projectSlug: string) =>
   api<AlertSettings>(`/api/0/projects/${orgSlug}/${projectSlug}/alert-settings`);

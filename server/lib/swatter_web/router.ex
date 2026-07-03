@@ -86,6 +86,7 @@ defmodule SwatterWeb.Router do
         :traces
 
     get "/organizations/:org_slug/traces/:trace_id", PerformanceController, :trace
+    get "/organizations/:org_slug/traces/:trace_id/errors", PerformanceController, :trace_errors
 
     get "/projects/:org_slug/:project_slug/alert-settings", AlertSettingsController, :show
     put "/projects/:org_slug/:project_slug/alert-settings", AlertSettingsController, :update

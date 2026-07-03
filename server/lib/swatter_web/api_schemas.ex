@@ -357,17 +357,46 @@ defmodule SwatterWeb.ApiSchemas do
     })
   end
 
+  defmodule RelatedError do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "RelatedError",
+      description: "Ошибка того же трейса (кросс-сервисная связка, ADR-0014)",
+      type: :object,
+      properties: %{
+        eventId: %Schema{type: :string},
+        issueId: %Schema{type: :string},
+        projectId: %Schema{type: :string},
+        projectSlug: %Schema{type: :string, nullable: true},
+        title: %Schema{type: :string},
+        level: %Schema{type: :string},
+        timestamp: %Schema{type: :string, format: :"date-time"}
+      },
+      required: [:eventId, :issueId, :projectId, :title, :level, :timestamp]
+    })
+  end
+
+  defmodule RelatedErrorList do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "RelatedErrorList",
+      type: :array,
+      items: SwatterWeb.ApiSchemas.RelatedError
+    })
+  end
+
   defmodule Trace do
     @moduledoc false
     OpenApiSpex.schema(%{
       title: "Trace",
-      description: "Спаны трейса по всем проектам организации (ADR-0014)",
+      description: "Спаны и ошибки трейса по всем проектам организации (ADR-0014)",
       type: :object,
       properties: %{
         traceId: %Schema{type: :string},
-        spans: %Schema{type: :array, items: SwatterWeb.ApiSchemas.TraceSpan}
+        spans: %Schema{type: :array, items: SwatterWeb.ApiSchemas.TraceSpan},
+        errors: %Schema{type: :array, items: SwatterWeb.ApiSchemas.RelatedError}
       },
-      required: [:traceId, :spans]
+      required: [:traceId, :spans, :errors]
     })
   end
 

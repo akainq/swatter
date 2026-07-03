@@ -754,6 +754,69 @@
         "x-struct": "Elixir.SwatterWeb.ApiSchemas.ProjectUpdateRequest",
         "x-validate": null
       },
+      "RelatedError": {
+        "description": "Ошибка того же трейса (кросс-сервисная связка, ADR-0014)",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "issueId": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "level": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "projectId": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "projectSlug": {
+            "nullable": true,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "title": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "eventId",
+          "issueId",
+          "projectId",
+          "title",
+          "level",
+          "timestamp"
+        ],
+        "title": "RelatedError",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.RelatedError",
+        "x-validate": null
+      },
+      "RelatedErrorList": {
+        "items": {
+          "$ref": "#/components/schemas/RelatedError"
+        },
+        "title": "RelatedErrorList",
+        "type": "array",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.RelatedErrorList",
+        "x-validate": null
+      },
       "Release": {
         "properties": {
           "firstEventAt": {
@@ -921,8 +984,16 @@
         "x-validate": null
       },
       "Trace": {
-        "description": "Спаны трейса по всем проектам организации (ADR-0014)",
+        "description": "Спаны и ошибки трейса по всем проектам организации (ADR-0014)",
         "properties": {
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/RelatedError"
+            },
+            "type": "array",
+            "x-struct": null,
+            "x-validate": null
+          },
           "spans": {
             "items": {
               "$ref": "#/components/schemas/TraceSpan"
@@ -939,7 +1010,8 @@
         },
         "required": [
           "traceId",
-          "spans"
+          "spans",
+          "errors"
         ],
         "title": "Trace",
         "type": "object",
@@ -1798,6 +1870,62 @@
           }
         },
         "summary": "Спаны трейса по организации (кросс-проектно, ADR-0014)",
+        "tags": [
+          "performance"
+        ]
+      }
+    },
+    "/api/0/organizations/{org_slug}/traces/{trace_id}/errors": {
+      "get": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.PerformanceController.trace_errors",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "",
+            "in": "path",
+            "name": "trace_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelatedErrorList"
+                }
+              }
+            },
+            "description": "Ошибки трейса"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Организация не найдена"
+          }
+        },
+        "summary": "Ошибки трейса по организации (кросс-сервисная связка, ADR-0014)",
         "tags": [
           "performance"
         ]

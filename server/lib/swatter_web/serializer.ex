@@ -99,6 +99,24 @@ defmodule SwatterWeb.Serializer do
     }
   end
 
+  def related_error(row, project_slugs) do
+    title =
+      case row.exception_type do
+        "" -> row.message
+        type -> "#{type}: #{row.exception_value}"
+      end
+
+    %{
+      "eventId" => row.event_id,
+      "issueId" => to_string(row.issue_id),
+      "projectId" => to_string(row.project_id),
+      "projectSlug" => Map.get(project_slugs, row.project_id),
+      "title" => String.slice(title, 0, 200),
+      "level" => row.level,
+      "timestamp" => DateTime.to_iso8601(row.timestamp)
+    }
+  end
+
   def ai_analysis(nil), do: nil
 
   def ai_analysis(analysis) do

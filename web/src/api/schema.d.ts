@@ -197,6 +197,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/0/organizations/{org_slug}/traces/{trace_id}/errors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Ошибки трейса по организации (кросс-сервисная связка, ADR-0014) */
+        get: operations["SwatterWeb.PerformanceController.trace_errors"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/0/projects/{org_slug}/{project_slug}": {
         parameters: {
             query?: never;
@@ -538,6 +555,22 @@ export interface components {
             name: string;
             platform?: string | null;
         };
+        /**
+         * RelatedError
+         * @description Ошибка того же трейса (кросс-сервисная связка, ADR-0014)
+         */
+        RelatedError: {
+            eventId: string;
+            issueId: string;
+            level: string;
+            projectId: string;
+            projectSlug?: string | null;
+            /** Format: date-time */
+            timestamp: string;
+            title: string;
+        };
+        /** RelatedErrorList */
+        RelatedErrorList: components["schemas"]["RelatedError"][];
         /** Release */
         Release: {
             /** Format: date-time */
@@ -580,9 +613,10 @@ export interface components {
         };
         /**
          * Trace
-         * @description Спаны трейса по всем проектам организации (ADR-0014)
+         * @description Спаны и ошибки трейса по всем проектам организации (ADR-0014)
          */
         Trace: {
+            errors: components["schemas"]["RelatedError"][];
             spans: components["schemas"]["TraceSpan"][];
             traceId: string;
         };
@@ -1094,6 +1128,38 @@ export interface operations {
                 };
             };
             /** @description Трейс не найден */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    "SwatterWeb.PerformanceController.trace_errors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_slug: string;
+                trace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ошибки трейса */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RelatedErrorList"];
+                };
+            };
+            /** @description Организация не найдена */
             404: {
                 headers: {
                     [name: string]: unknown;

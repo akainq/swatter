@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 import { fetchTrace } from "../api/client";
-import type { TraceSpan } from "../api/client";
+import type { RelatedError, TraceSpan } from "../api/client";
+import LevelBadge from "../components/LevelBadge";
+import { formatDateTime, timeAgo } from "../lib/time";
 
 interface SpanNode {
   span: TraceSpan;
@@ -13,13 +15,16 @@ interface SpanNode {
 export default function TracePage() {
   const { orgSlug = "", traceId = "" } = useParams();
   const [spans, setSpans] = useState<TraceSpan[] | null>(null);
+  const [errors, setErrors] = useState<RelatedError[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     fetchTrace(orgSlug, traceId)
       .then((trace) => {
-        if (!cancelled) setSpans(trace.spans);
+        if (cancelled) return;
+        setSpans(trace.spans);
+        setErrors(trace.errors ?? []);
       })
       .catch((err) => {
         if (!cancelled) setError(String(err));
@@ -28,6 +33,13 @@ export default function TracePage() {
       cancelled = true;
     };
   }, [orgSlug, traceId]);
+
+  // ошибки трейса по проектам — красный бейдж на сегменте сервиса
+  const errorsByProject = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const err of errors) map.set(err.projectId, (map.get(err.projectId) ?? 0) + 1);
+    return map;
+  }, [errors]);
 
   const { nodes, minStart, total, multiProject } = useMemo(() => layout(spans ?? []), [spans]);
 
@@ -62,6 +74,11 @@ export default function TracePage() {
                 {multiProject && span.projectSlug && (
                   <span className="badge project-badge">{span.projectSlug}</span>
                 )}
+                {span.isSegment && (errorsByProject.get(span.projectId ?? "") ?? 0) > 0 && (
+                  <span className="badge trace-error">
+                    {errorsByProject.get(span.projectId ?? "")} err
+                  </span>
+                )}
               </div>
               <div className="wf-track">
                 <span
@@ -76,6 +93,29 @@ export default function TracePage() {
           );
         })}
       </div>
+
+      {errors.length > 0 && (
+        <section>
+          <h3>Errors in this trace</h3>
+          <ul className="issue-list">
+            {errors.map((err) => (
+              <li key={err.eventId}>
+                <Link
+                  to={`/${orgSlug}/${err.projectSlug ?? ""}/issues/${err.issueId}`}
+                  className="issue-row"
+                >
+                  <LevelBadge level={err.level} />
+                  <span className="issue-title">{err.title}</span>
+                  {err.projectSlug && <span className="badge project-badge">{err.projectSlug}</span>}
+                  <span className="muted small" title={formatDateTime(err.timestamp)}>
+                    {timeAgo(err.timestamp)}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <p className="muted small">
         <Link to={`/${orgSlug}/projects`} className="muted">
