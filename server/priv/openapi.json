@@ -2,6 +2,172 @@
   "components": {
     "responses": {},
     "schemas": {
+      "AIAnalysis": {
+        "description": "AI-анализ issue (ADR-0016), запускается по запросу",
+        "properties": {
+          "analyzedAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "error": {
+            "nullable": true,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "model": {
+            "nullable": true,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "probableCause": {
+            "nullable": true,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "severity": {
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "nullable": true,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "ok",
+              "error"
+            ],
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "suggestedFix": {
+            "nullable": true,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "summary": {
+            "nullable": true,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "AIAnalysis",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.AIAnalysis",
+        "x-validate": null
+      },
+      "AlertSettings": {
+        "description": "Per-project настройки Telegram-алертов (ADR-0013)",
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "frequencyThreshold": {
+            "description": "N событий за окно → алерт; null = правило выключено",
+            "nullable": true,
+            "type": "integer",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "frequencyWindowSeconds": {
+            "type": "integer",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "onNewIssue": {
+            "type": "boolean",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "onRegression": {
+            "type": "boolean",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "telegramChatId": {
+            "nullable": true,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "telegramConfigured": {
+            "description": "задан ли общий TELEGRAM_BOT_TOKEN на инстансе",
+            "type": "boolean",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "enabled",
+          "telegramConfigured",
+          "onNewIssue",
+          "onRegression",
+          "frequencyWindowSeconds"
+        ],
+        "title": "AlertSettings",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.AlertSettings",
+        "x-validate": null
+      },
+      "AlertSettingsUpdateRequest": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "frequencyThreshold": {
+            "nullable": true,
+            "type": "integer",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "frequencyWindowSeconds": {
+            "type": "integer",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "onNewIssue": {
+            "type": "boolean",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "onRegression": {
+            "type": "boolean",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "telegramChatId": {
+            "nullable": true,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "title": "AlertSettingsUpdateRequest",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.AlertSettingsUpdateRequest",
+        "x-validate": null
+      },
       "Artifact": {
         "properties": {
           "debugId": {
@@ -288,6 +454,24 @@
       },
       "Issue": {
         "properties": {
+          "aiAnalysis": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AIAnalysis"
+              }
+            ],
+            "description": "только в деталке; null, если анализ не запрашивался",
+            "nullable": true,
+            "x-struct": null,
+            "x-validate": null
+          },
+          "aiEnabled": {
+            "description": "только в деталке: настроен ли AI на инстансе (ZAI_API_KEY)",
+            "nullable": true,
+            "type": "boolean",
+            "x-struct": null,
+            "x-validate": null
+          },
           "count": {
             "description": "times_seen",
             "type": "integer",
@@ -1022,6 +1206,62 @@
         ]
       }
     },
+    "/api/0/issues/{issue_id}/analyze": {
+      "post": {
+        "callbacks": {},
+        "description": "Ставит фоновую джобу анализа на z.ai; результат опрашивается через деталку issue.",
+        "operationId": "SwatterWeb.IssueController.analyze",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "issue_id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "x-struct": null,
+              "x-validate": null
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIAnalysis"
+                }
+              }
+            },
+            "description": "Анализ поставлен в очередь"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Не найден"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "AI не настроен"
+          }
+        },
+        "summary": "Запросить AI-анализ issue (ADR-0016, только по запросу)",
+        "tags": [
+          "issues"
+        ]
+      }
+    },
     "/api/0/issues/{issue_id}/events": {
       "get": {
         "callbacks": {},
@@ -1362,6 +1602,138 @@
         "summary": "Переименовать проект (slug неизменяем)",
         "tags": [
           "projects"
+        ]
+      }
+    },
+    "/api/0/projects/{org_slug}/{project_slug}/alert-settings": {
+      "get": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.AlertSettingsController.show",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "",
+            "in": "path",
+            "name": "project_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertSettings"
+                }
+              }
+            },
+            "description": "Настройки"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Проект не найден"
+          }
+        },
+        "summary": "Настройки Telegram-алертов проекта (ADR-0013)",
+        "tags": [
+          "alerts"
+        ]
+      },
+      "put": {
+        "callbacks": {},
+        "description": "Частичное обновление: применяются только присланные поля.",
+        "operationId": "SwatterWeb.AlertSettingsController.update",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "",
+            "in": "path",
+            "name": "project_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertSettingsUpdateRequest"
+              }
+            }
+          },
+          "description": "Изменения",
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertSettings"
+                }
+              }
+            },
+            "description": "Обновлённые настройки"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка валидации"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Проект не найден"
+          }
+        },
+        "summary": "Обновить настройки алертов проекта",
+        "tags": [
+          "alerts"
         ]
       }
     },

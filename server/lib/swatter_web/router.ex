@@ -76,8 +76,11 @@ defmodule SwatterWeb.Router do
     get "/projects/:org_slug/:project_slug/filters", IssueController, :filters
     get "/projects/:org_slug/:project_slug/releases", ReleaseController, :index
     get "/projects/:org_slug/:project_slug/releases/:version", ReleaseController, :show
+    get "/projects/:org_slug/:project_slug/alert-settings", AlertSettingsController, :show
+    put "/projects/:org_slug/:project_slug/alert-settings", AlertSettingsController, :update
     get "/issues/:issue_id", IssueController, :show
     put "/issues/:issue_id", IssueController, :update
+    post "/issues/:issue_id/analyze", IssueController, :analyze
     get "/issues/:issue_id/events", EventController, :index
     get "/issues/:issue_id/events/latest", EventController, :latest
   end

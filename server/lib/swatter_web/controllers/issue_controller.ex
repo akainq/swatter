@@ -111,8 +111,46 @@ defmodule SwatterWeb.IssueController do
 
   def show(conn, %{"issue_id" => issue_id}) do
     case fetch_issue(conn, issue_id) do
-      nil -> conn |> put_status(404) |> json(%{detail: "issue not found"})
-      issue -> json(conn, Serializer.issue(issue))
+      nil ->
+        conn |> put_status(404) |> json(%{detail: "issue not found"})
+
+      issue ->
+        detail =
+          issue
+          |> Serializer.issue()
+          |> Map.merge(%{
+            "aiAnalysis" => Serializer.ai_analysis(Swatter.AI.get_analysis(issue.id)),
+            "aiEnabled" => Swatter.AI.enabled?()
+          })
+
+        json(conn, detail)
+    end
+  end
+
+  operation(:analyze,
+    summary: "Запросить AI-анализ issue (ADR-0016, только по запросу)",
+    description:
+      "Ставит фоновую джобу анализа на z.ai; результат опрашивается через деталку issue.",
+    parameters: [issue_id: [in: :path, type: :integer, required: true]],
+    responses: [
+      accepted: {"Анализ поставлен в очередь", "application/json", ApiSchemas.AIAnalysis},
+      not_found: {"Не найден", "application/json", ApiSchemas.Error},
+      unprocessable_entity: {"AI не настроен", "application/json", ApiSchemas.Error}
+    ]
+  )
+
+  def analyze(conn, %{"issue_id" => issue_id}) do
+    with issue when not is_nil(issue) <- fetch_issue(conn, issue_id),
+         {:ok, analysis} <- Swatter.AI.request_analysis(issue) do
+      conn |> put_status(202) |> json(Serializer.ai_analysis(analysis))
+    else
+      nil ->
+        conn |> put_status(404) |> json(%{detail: "issue not found"})
+
+      {:error, :ai_disabled} ->
+        conn
+        |> put_status(422)
+        |> json(%{detail: "AI analysis is not configured (set ZAI_API_KEY)"})
     end
   end
 

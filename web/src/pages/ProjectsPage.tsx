@@ -146,9 +146,14 @@ function ProjectCard({
         </div>
       )}
 
-      <Link to={`/${orgSlug}/${project.slug}`} className="btn wide">
-        Open issues
-      </Link>
+      <div className="project-actions">
+        <Link to={`/${orgSlug}/${project.slug}`} className="btn wide">
+          Open issues
+        </Link>
+        <Link to={`/${orgSlug}/${project.slug}/settings/alerts`} className="btn">
+          Alerts
+        </Link>
+      </div>
     </div>
   );
 }

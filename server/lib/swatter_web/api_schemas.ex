@@ -119,6 +119,30 @@ defmodule SwatterWeb.ApiSchemas do
     })
   end
 
+  defmodule AIAnalysis do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "AIAnalysis",
+      description: "AI-анализ issue (ADR-0016), запускается по запросу",
+      type: :object,
+      properties: %{
+        status: %Schema{type: :string, enum: ["pending", "ok", "error"]},
+        summary: %Schema{type: :string, nullable: true},
+        probableCause: %Schema{type: :string, nullable: true},
+        severity: %Schema{
+          type: :string,
+          nullable: true,
+          enum: ["low", "medium", "high", "critical"]
+        },
+        suggestedFix: %Schema{type: :string, nullable: true},
+        model: %Schema{type: :string, nullable: true},
+        error: %Schema{type: :string, nullable: true},
+        analyzedAt: %Schema{type: :string, format: :"date-time", nullable: true}
+      },
+      required: [:status]
+    })
+  end
+
   defmodule Issue do
     @moduledoc false
     OpenApiSpex.schema(%{
@@ -138,6 +162,16 @@ defmodule SwatterWeb.ApiSchemas do
           type: :object,
           nullable: true,
           properties: %{id: %Schema{type: :string}, slug: %Schema{type: :string}}
+        },
+        aiAnalysis: %Schema{
+          allOf: [SwatterWeb.ApiSchemas.AIAnalysis],
+          nullable: true,
+          description: "только в деталке; null, если анализ не запрашивался"
+        },
+        aiEnabled: %Schema{
+          type: :boolean,
+          nullable: true,
+          description: "только в деталке: настроен ли AI на инстансе (ZAI_API_KEY)"
         }
       },
       required: [:id, :title, :culprit, :level, :status, :count, :firstSeen, :lastSeen]
@@ -244,6 +278,54 @@ defmodule SwatterWeb.ApiSchemas do
         platform: %Schema{type: :string, nullable: true}
       },
       required: [:name, :slug]
+    })
+  end
+
+  defmodule AlertSettings do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "AlertSettings",
+      description: "Per-project настройки Telegram-алертов (ADR-0013)",
+      type: :object,
+      properties: %{
+        enabled: %Schema{type: :boolean},
+        telegramChatId: %Schema{type: :string, nullable: true},
+        telegramConfigured: %Schema{
+          type: :boolean,
+          description: "задан ли общий TELEGRAM_BOT_TOKEN на инстансе"
+        },
+        onNewIssue: %Schema{type: :boolean},
+        onRegression: %Schema{type: :boolean},
+        frequencyThreshold: %Schema{
+          type: :integer,
+          nullable: true,
+          description: "N событий за окно → алерт; null = правило выключено"
+        },
+        frequencyWindowSeconds: %Schema{type: :integer}
+      },
+      required: [
+        :enabled,
+        :telegramConfigured,
+        :onNewIssue,
+        :onRegression,
+        :frequencyWindowSeconds
+      ]
+    })
+  end
+
+  defmodule AlertSettingsUpdateRequest do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "AlertSettingsUpdateRequest",
+      type: :object,
+      properties: %{
+        enabled: %Schema{type: :boolean},
+        telegramChatId: %Schema{type: :string, nullable: true},
+        onNewIssue: %Schema{type: :boolean},
+        onRegression: %Schema{type: :boolean},
+        frequencyThreshold: %Schema{type: :integer, nullable: true},
+        frequencyWindowSeconds: %Schema{type: :integer}
+      }
     })
   end
 

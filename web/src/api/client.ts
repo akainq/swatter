@@ -11,6 +11,9 @@ export type CurrentUser = components["schemas"]["CurrentUser"];
 export type SetupRequest = components["schemas"]["SetupRequest"];
 export type Release = components["schemas"]["Release"];
 export type ReleaseDetail = components["schemas"]["ReleaseDetail"];
+export type AIAnalysis = components["schemas"]["AIAnalysis"];
+export type AlertSettings = components["schemas"]["AlertSettings"];
+export type AlertSettingsUpdate = components["schemas"]["AlertSettingsUpdateRequest"];
 
 export class ApiError extends Error {
   status: number;
@@ -133,6 +136,24 @@ export const updateIssueStatus = (issueId: string, status: Issue["status"]) =>
   api<Issue>(`/api/0/issues/${issueId}`, {
     method: "PUT",
     body: JSON.stringify({ status }),
+  });
+
+// AI-анализ по запросу (ADR-0016): ставит фоновую джобу; результат
+// опрашивается повторными fetchIssue
+export const analyzeIssue = (issueId: string) =>
+  api<AIAnalysis>(`/api/0/issues/${issueId}/analyze`, { method: "POST" });
+
+export const fetchAlertSettings = (orgSlug: string, projectSlug: string) =>
+  api<AlertSettings>(`/api/0/projects/${orgSlug}/${projectSlug}/alert-settings`);
+
+export const updateAlertSettings = (
+  orgSlug: string,
+  projectSlug: string,
+  body: AlertSettingsUpdate,
+) =>
+  api<AlertSettings>(`/api/0/projects/${orgSlug}/${projectSlug}/alert-settings`, {
+    method: "PUT",
+    body: JSON.stringify(body),
   });
 
 // --- auth (ADR-0007) ---

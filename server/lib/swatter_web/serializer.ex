@@ -60,6 +60,33 @@ defmodule SwatterWeb.Serializer do
     }
   end
 
+  def ai_analysis(nil), do: nil
+
+  def ai_analysis(analysis) do
+    %{
+      "status" => analysis.status,
+      "summary" => analysis.summary,
+      "probableCause" => analysis.probable_cause,
+      "severity" => analysis.severity,
+      "suggestedFix" => analysis.suggested_fix,
+      "model" => analysis.model,
+      "error" => analysis.error,
+      "analyzedAt" => analysis.analyzed_at && DateTime.to_iso8601(analysis.analyzed_at)
+    }
+  end
+
+  def alert_settings(settings, telegram_configured?) do
+    %{
+      "enabled" => settings.enabled,
+      "telegramChatId" => settings.telegram_chat_id,
+      "telegramConfigured" => telegram_configured?,
+      "onNewIssue" => settings.on_new_issue,
+      "onRegression" => settings.on_regression,
+      "frequencyThreshold" => settings.frequency_threshold,
+      "frequencyWindowSeconds" => settings.frequency_window_seconds
+    }
+  end
+
   def release(%{release: release, new_issues: new_issues}) do
     release |> release() |> Map.put("newIssues", new_issues)
   end

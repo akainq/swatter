@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import {
   ApiError,
+  analyzeIssue,
   fetchIssue,
   fetchIssueEvents,
   fetchLatestEvent,
@@ -161,6 +162,8 @@ export default function IssueDetailPage() {
         {shown?.user?.email && <Meta label="User" value={shown.user.email} />}
       </div>
 
+      <AIPanel issue={issue} issueId={issueId} onIssue={setIssue} />
+
       {shown?.message && (
         <section>
           <h3>Message</h3>
@@ -247,6 +250,92 @@ export default function IssueDetailPage() {
         </section>
       )}
     </div>
+  );
+}
+
+// AI-анализ по запросу (ADR-0016): кнопка ставит джобу, статус опрашивается
+// повторными fetchIssue до выхода из pending
+function AIPanel({
+  issue,
+  issueId,
+  onIssue,
+}: {
+  issue: Issue;
+  issueId: string;
+  onIssue: (issue: Issue) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [panelError, setPanelError] = useState<string | null>(null);
+
+  const analysis = issue.aiAnalysis ?? null;
+
+  const run = async () => {
+    setBusy(true);
+    setPanelError(null);
+    try {
+      await analyzeIssue(issueId);
+      for (let attempt = 0; attempt < 30; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        const updated = await fetchIssue(issueId);
+        onIssue(updated);
+        if (updated.aiAnalysis && updated.aiAnalysis.status !== "pending") return;
+      }
+      setPanelError("Analysis is taking too long — reload the page later.");
+    } catch (err) {
+      setPanelError(err instanceof ApiError ? err.message : String(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // AI на инстансе не настроен и анализа нет — не показываем секцию вовсе
+  if (!issue.aiEnabled && !analysis) return null;
+
+  const pending = busy || analysis?.status === "pending";
+
+  return (
+    <section>
+      <h3>
+        AI analysis{" "}
+        {analysis?.model && <span className="muted small">{analysis.model}</span>}
+      </h3>
+      <div className="card ai-panel">
+        {analysis?.status === "ok" && (
+          <>
+            <p className="ai-summary">
+              {analysis.severity && (
+                <span className={`badge sev-${analysis.severity}`}>{analysis.severity}</span>
+              )}
+              <strong>{analysis.summary}</strong>
+            </p>
+            {analysis.probableCause && (
+              <p>
+                <span className="muted small">Probable cause</span>
+                <br />
+                {analysis.probableCause}
+              </p>
+            )}
+            {analysis.suggestedFix && (
+              <p>
+                <span className="muted small">Suggested fix</span>
+                <br />
+                {analysis.suggestedFix}
+              </p>
+            )}
+          </>
+        )}
+        {analysis?.status === "error" && (
+          <p className="error-text">Analysis failed: {analysis.error ?? "unknown error"}</p>
+        )}
+        {pending && <p className="muted">Analyzing…</p>}
+        {panelError && <p className="error-text small">{panelError}</p>}
+        {issue.aiEnabled && !pending && (
+          <button className="btn" onClick={() => void run()}>
+            {analysis ? "Re-analyze" : "Analyze with AI"}
+          </button>
+        )}
+      </div>
+    </section>
   );
 }
 

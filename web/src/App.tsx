@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { BrowserRouter, Link, Navigate, Route, Routes, useNavigate } from "react-router";
 import { ApiError, fetchMe, fetchProjects, fetchSetupStatus, logout } from "./api/client";
 import type { CurrentUser } from "./api/client";
+import AlertSettingsPage from "./pages/AlertSettingsPage";
 import CreateProjectPage from "./pages/CreateProjectPage";
 import IssueDetailPage from "./pages/IssueDetailPage";
 import IssuesPage from "./pages/IssuesPage";
@@ -102,6 +103,7 @@ function Shell({ user, onSignedOut }: { user: CurrentUser; onSignedOut: () => Pr
           <Route path="/:orgSlug/projects" element={<ProjectsPage />} />
           <Route path="/:orgSlug/projects/new" element={<CreateProjectPage />} />
           <Route path="/:orgSlug/:projectSlug/releases" element={<ReleasesPage />} />
+          <Route path="/:orgSlug/:projectSlug/settings/alerts" element={<AlertSettingsPage />} />
           <Route path="/:orgSlug/:projectSlug" element={<IssuesPage />} />
           <Route path="/:orgSlug/:projectSlug/issues/:issueId" element={<IssueDetailPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />

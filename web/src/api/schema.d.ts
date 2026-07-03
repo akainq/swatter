@@ -91,6 +91,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/0/issues/{issue_id}/analyze": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Запросить AI-анализ issue (ADR-0016, только по запросу)
+         * @description Ставит фоновую джобу анализа на z.ai; результат опрашивается через деталку issue.
+         */
+        post: operations["SwatterWeb.IssueController.analyze"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/0/issues/{issue_id}/events": {
         parameters: {
             query?: never;
@@ -170,6 +190,27 @@ export interface paths {
         get?: never;
         /** Переименовать проект (slug неизменяем) */
         put: operations["SwatterWeb.ProjectController.update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/0/projects/{org_slug}/{project_slug}/alert-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Настройки Telegram-алертов проекта (ADR-0013) */
+        get: operations["SwatterWeb.AlertSettingsController.show"];
+        /**
+         * Обновить настройки алертов проекта
+         * @description Частичное обновление: применяются только присланные поля.
+         */
+        put: operations["SwatterWeb.AlertSettingsController.update"];
         post?: never;
         delete?: never;
         options?: never;
@@ -274,6 +315,47 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * AIAnalysis
+         * @description AI-анализ issue (ADR-0016), запускается по запросу
+         */
+        AIAnalysis: {
+            /** Format: date-time */
+            analyzedAt?: string | null;
+            error?: string | null;
+            model?: string | null;
+            probableCause?: string | null;
+            /** @enum {string|null} */
+            severity?: "low" | "medium" | "high" | "critical" | null;
+            /** @enum {string} */
+            status: "pending" | "ok" | "error";
+            suggestedFix?: string | null;
+            summary?: string | null;
+        };
+        /**
+         * AlertSettings
+         * @description Per-project настройки Telegram-алертов (ADR-0013)
+         */
+        AlertSettings: {
+            enabled: boolean;
+            /** @description N событий за окно → алерт; null = правило выключено */
+            frequencyThreshold?: number | null;
+            frequencyWindowSeconds: number;
+            onNewIssue: boolean;
+            onRegression: boolean;
+            telegramChatId?: string | null;
+            /** @description задан ли общий TELEGRAM_BOT_TOKEN на инстансе */
+            telegramConfigured: boolean;
+        };
+        /** AlertSettingsUpdateRequest */
+        AlertSettingsUpdateRequest: {
+            enabled?: boolean;
+            frequencyThreshold?: number | null;
+            frequencyWindowSeconds?: number;
+            onNewIssue?: boolean;
+            onRegression?: boolean;
+            telegramChatId?: string | null;
+        };
         /** Artifact */
         Artifact: {
             debugId: string;
@@ -338,6 +420,10 @@ export interface components {
         };
         /** Issue */
         Issue: {
+            /** @description только в деталке; null, если анализ не запрашивался */
+            aiAnalysis?: components["schemas"]["AIAnalysis"] | null;
+            /** @description только в деталке: настроен ли AI на инстансе (ZAI_API_KEY) */
+            aiEnabled?: boolean | null;
             /** @description times_seen */
             count: number;
             culprit: string;
@@ -670,6 +756,46 @@ export interface operations {
             };
         };
     };
+    "SwatterWeb.IssueController.analyze": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                issue_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Анализ поставлен в очередь */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AIAnalysis"];
+                };
+            };
+            /** @description Не найден */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description AI не настроен */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     "SwatterWeb.EventController.index": {
         parameters: {
             query?: {
@@ -864,6 +990,84 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Project"];
+                };
+            };
+            /** @description Ошибка валидации */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Проект не найден */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    "SwatterWeb.AlertSettingsController.show": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_slug: string;
+                project_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Настройки */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertSettings"];
+                };
+            };
+            /** @description Проект не найден */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    "SwatterWeb.AlertSettingsController.update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_slug: string;
+                project_slug: string;
+            };
+            cookie?: never;
+        };
+        /** @description Изменения */
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AlertSettingsUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Обновлённые настройки */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertSettings"];
                 };
             };
             /** @description Ошибка валидации */
