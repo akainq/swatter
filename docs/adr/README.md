@@ -24,6 +24,7 @@
 | [0011](0011-js-symbolication.md) | JS-символикация: Debug IDs, свой sourcemap-декодер на BEAM, кэш в ETS | Accepted |
 | [0012](0012-artifact-upload.md) | Загрузка артефактов: свой multipart endpoint, хранение gzip-bytea в PG; chunk-upload позже | Accepted |
 | [0013](0013-alerting-engine.md) | Движок алертов: правила (new/regression/частота), cooldown в Redis, Telegram-доставка через Oban | Accepted |
+| [0014](0014-tracing-data-model.md) | Трейсинг: одна таблица spans в CH (is_segment, TTL 30 дней, bloom по trace_id), агрегаты на лету, error↔trace по trace_id | Accepted |
 | [0016](0016-ai-issue-analysis.md) | AI-анализ issues на z.ai GLM (суть/причина/severity/фикс), фон через Oban, опционально | Accepted |
 
 ## Роадмап решений (очередь на проработку)
@@ -33,5 +34,4 @@
 | ADR | Вопрос | Блокирует | Статус |
 |---|---|---|---|
 | 0010 | Retention и жизненный цикл данных в ClickHouse (TTL, downsampling) | M1 | — |
-| 0014 | Модель данных трейсинга: схема spans в CH, sampling, связь с errors | M4 | — |
 | 0015 | Самомониторинг: как Swatter мониторит сам себя (dogfooding + внешний контур) | M3+ | — |

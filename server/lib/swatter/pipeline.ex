@@ -20,8 +20,9 @@ defmodule Swatter.Pipeline do
   alias Swatter.EventsRepo
   alias Swatter.Ingest.Envelope
   alias Swatter.Issues
-  alias Swatter.Pipeline.Normalizer
+  alias Swatter.Pipeline.{Normalizer, SpanBuilder}
   alias Swatter.Projects
+  alias Swatter.Spans.Span
 
   @max_attempts 5
 
@@ -66,20 +67,23 @@ defmodule Swatter.Pipeline do
     entry = fields |> Enum.chunk_every(2) |> Map.new(fn [k, v] -> {k, v} end)
 
     case process_entry(entry) do
-      {:ok, [_ | _] = rows} ->
+      {:ok, %{events: [], spans: []}} ->
+        message |> Message.put_data(%{events: [], spans: []}) |> Message.put_batcher(:noop)
+
+      {:ok, rows} ->
         message |> Message.put_data(rows) |> Message.put_batcher(:clickhouse)
 
-      _empty_or_dropped ->
-        message |> Message.put_data([]) |> Message.put_batcher(:noop)
+      _dropped ->
+        message |> Message.put_data(%{events: [], spans: []}) |> Message.put_batcher(:noop)
     end
   end
 
   # Redelivery после сбоя батчера: producer переигрывает сообщение с уже
   # построенными строками — issue не апсертим повторно, только довставляем в CH
-  def handle_message(_processor, %Message{data: rows} = message, _context) when is_list(rows) do
-    case rows do
-      [_ | _] -> Message.put_batcher(message, :clickhouse)
-      [] -> Message.put_batcher(message, :noop)
+  def handle_message(_processor, %Message{data: %{events: events, spans: spans}} = message, _ctx) do
+    case {events, spans} do
+      {[], []} -> Message.put_batcher(message, :noop)
+      _ -> Message.put_batcher(message, :clickhouse)
     end
   end
 
@@ -92,12 +96,19 @@ defmodule Swatter.Pipeline do
         |> String.to_integer()
         |> DateTime.from_unix!(:millisecond)
 
-      rows =
+      event_rows =
         items
         |> Enum.filter(fn {item_header, _} -> item_header["type"] == "event" end)
         |> Enum.flat_map(&persist_event(&1, project, received_at))
 
-      {:ok, rows}
+      # transaction-items (ADR-0014): не создают issues и не алертят —
+      # только строки spans в CH
+      span_rows =
+        items
+        |> Enum.filter(fn {item_header, _} -> item_header["type"] == "transaction" end)
+        |> Enum.flat_map(&build_spans(&1, project, received_at))
+
+      {:ok, %{events: event_rows, spans: span_rows}}
     else
       nil ->
         Logger.warning("pipeline: dropping envelope for unknown project #{entry["project_id"]}")
@@ -106,6 +117,17 @@ defmodule Swatter.Pipeline do
       _ ->
         Logger.warning("pipeline: dropping malformed envelope (project #{entry["project_id"]})")
         :drop
+    end
+  end
+
+  defp build_spans({_item_header, payload}, project, received_at) do
+    case Jason.decode(payload) do
+      {:ok, tx} when is_map(tx) ->
+        SpanBuilder.build(tx, project, received_at)
+
+      _ ->
+        Logger.warning("pipeline: dropping malformed transaction item (project #{project.id})")
+        []
     end
   end
 
@@ -152,10 +174,12 @@ defmodule Swatter.Pipeline do
 
   @impl true
   def handle_batch(:clickhouse, messages, _batch_info, _context) do
-    rows = Enum.flat_map(messages, & &1.data)
+    events = Enum.flat_map(messages, & &1.data.events)
+    spans = Enum.flat_map(messages, & &1.data.spans)
 
     # инфраструктурная ошибка CH валит весь батч → redelivery всех сообщений
-    EventsRepo.insert_all(Event, rows)
+    if events != [], do: EventsRepo.insert_all(Event, events)
+    if spans != [], do: EventsRepo.insert_all(Span, spans)
     messages
   end
 

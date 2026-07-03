@@ -18,6 +18,7 @@ defmodule Swatter.ConformanceHelpers do
   def prepare! do
     Redix.command!(Buffer.conn_name(), ["DEL", Buffer.stream()])
     EventsRepo.query!("TRUNCATE TABLE events")
+    EventsRepo.query!("TRUNCATE TABLE spans")
     {project, key} = project_fixture()
 
     port = Application.get_env(:swatter, SwatterWeb.Endpoint)[:http][:port]
