@@ -39,6 +39,9 @@ config :swatter, Oban, testing: :manual
 # Telegram-HTTP в тестах — через Req.Test (без реального api.telegram.org)
 config :swatter, :alerts, req_options: [plug: {Req.Test, Swatter.Alerts.Telegram}]
 
+# z.ai-HTTP в тестах — через Req.Test (без реального api.z.ai)
+config :swatter, :ai, req_options: [plug: {Req.Test, Swatter.AI.ZAI}]
+
 # Отдельный стрим и маленькие лимиты, чтобы тесты на 413 не гоняли мегабайты
 config :swatter, :ingest,
   stream: "swatter:test:envelopes",

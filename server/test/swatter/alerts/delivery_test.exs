@@ -101,6 +101,32 @@ defmodule Swatter.Alerts.DeliveryTest do
 
       assert :ok = perform_job(NotifyWorker, %{"issue_id" => issue.id, "rule" => "new_issue"})
     end
+
+    test "готовый AI-анализ попадает в текст алерта", %{prev: prev} do
+      with_token(prev)
+      {project, _} = project_fixture()
+      {:ok, _} = Alerts.upsert_settings(project.id, %{telegram_chat_id: "-100"})
+      issue = new_issue!(project)
+
+      {:ok, _} =
+        Swatter.AI.store_ok(
+          issue.id,
+          %{summary: "AI: разыменование nil в чекауте", severity: "high"},
+          "glm-4.6"
+        )
+
+      parent = self()
+
+      Req.Test.stub(Telegram, fn conn ->
+        {:ok, body, conn} = Plug.Conn.read_body(conn)
+        send(parent, {:tg_body, body})
+        Req.Test.json(conn, %{"ok" => true})
+      end)
+
+      assert :ok = perform_job(NotifyWorker, %{"issue_id" => issue.id, "rule" => "new_issue"})
+      assert_received {:tg_body, body}
+      assert Jason.decode!(body)["text"] =~ "AI: разыменование nil в чекауте"
+    end
   end
 
   describe "maybe_notify/1" do

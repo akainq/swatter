@@ -27,8 +27,17 @@ defmodule Swatter.Alerts.NotifyWorker do
         :ok
 
       true ->
-        text = Message.build(issue, rule, host: args["host"])
+        text = Message.build(issue, rule, host: args["host"], ai_summary: ai_summary(issue.id))
         deliver(settings.telegram_chat_id, text)
+    end
+  end
+
+  # ранее сделанный AI-анализ (ADR-0016) — best-effort: анализ по запросу,
+  # обычно алерт уходит без него; ждать LLM алерт не должен никогда
+  defp ai_summary(issue_id) do
+    case Swatter.AI.get_analysis(issue_id) do
+      %{status: "ok", summary: summary} -> summary
+      _ -> nil
     end
   end
 
