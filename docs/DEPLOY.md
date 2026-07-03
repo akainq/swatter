@@ -54,6 +54,11 @@ docker compose -f docker-compose.prod.yaml up -d --build
 | `PHX_HOST` | да | внешний домен (ссылки, куки, force_ssl) |
 | `PORT` | нет (4000) | HTTP-порт приложения |
 | `POOL_SIZE` | нет (10) | пул PostgreSQL |
+| `TELEGRAM_BOT_TOKEN` | нет | Telegram-алерты (ADR-0013): токен бота, общий на инстанс; без него алерты выключены. `chat_id` — per-project в UI (Projects → Alerts) |
+| `ALERT_COOLDOWN_SECONDS` | нет (900) | cooldown повторных алертов по одному issue |
+| `ZAI_API_KEY` | нет | AI-анализ issues (ADR-0016, z.ai): без ключа фича выключена, кнопки в UI нет |
+| `ZAI_MODEL` | нет (glm-4.6) | строка модели z.ai |
+| `ZAI_BASE_URL` | нет | переопределение эндпоинта z.ai |
 
 ## Health и диагностика
 
@@ -65,3 +70,23 @@ docker compose -f docker-compose.prod.yaml up -d --build
   docker compose -f docker-compose.prod.yaml exec swatter \
     /app/bin/swatter rpc 'Swatter.Release.reset_password("admin@example.com")'
   ```
+
+## Сборка падает на hex.pm (`:timeout`, «Unknown package … in lockfile»)
+
+Симптом: `mix local.hex` или `mix deps.get` в docker-сборке висят ~15 с на запрос и
+падают (`Failed to fetch record … :timeout`; «Unknown package X in lockfile» — следствие
+недокачанного реестра, lockfile ни при чём). Сам Dockerfile уже ретраит эти шаги и
+поднимает `HEX_HTTP_TIMEOUT`, так что редкие флапы сборку не роняют. Если падает стабильно —
+у хоста нестабильный маршрут до hex.pm (Fastly), чаще всего битый IPv6 (адрес есть,
+маршрута нет → каждый запрос ждёт таймаут IPv6 перед фолбэком на IPv4):
+
+```sh
+# диагностика
+ip -6 addr show scope global; ip -6 route show default
+docker run --rm elixir:1.20-otp-29 bash -lc 'time mix local.hex --force'
+
+# лечение: отключить IPv6 и перезапустить docker
+printf 'net.ipv6.conf.all.disable_ipv6=1\nnet.ipv6.conf.default.disable_ipv6=1\n' \
+  | sudo tee /etc/sysctl.d/99-disable-ipv6.conf
+sudo sysctl --system && sudo systemctl restart docker
+```

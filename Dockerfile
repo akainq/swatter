@@ -10,13 +10,19 @@ RUN bun run build
 
 # --- 2. Сборка Elixir-релиза -------------------------------------------------
 FROM elixir:1.20-otp-29 AS build
-ENV MIX_ENV=prod LANG=C.UTF-8
+# hex.pm из сборочных сетей бывает нестабилен (таймауты к Fastly): щадящий
+# HTTP-таймаут + меньше параллельных соединений + ретраи на сетевых шагах
+ENV MIX_ENV=prod LANG=C.UTF-8 HEX_HTTP_TIMEOUT=120 HEX_HTTP_CONCURRENCY=2
 WORKDIR /app
 
-RUN mix local.hex --force && mix local.rebar --force
+RUN i=0; until mix local.hex --force && mix local.rebar --force; do \
+      i=$((i+1)); [ $i -ge 3 ] && exit 1; echo "hex bootstrap retry $i"; sleep 5; \
+    done
 
 COPY server/mix.exs server/mix.lock ./
-RUN mix deps.get --only prod
+RUN i=0; until mix deps.get --only prod; do \
+      i=$((i+1)); [ $i -ge 5 ] && exit 1; echo "deps.get retry $i"; sleep 10; \
+    done
 
 COPY server/config config
 RUN mix deps.compile
