@@ -7,6 +7,7 @@ import CreateProjectPage from "./pages/CreateProjectPage";
 import IssueDetailPage from "./pages/IssueDetailPage";
 import IssuesPage from "./pages/IssuesPage";
 import LoginPage from "./pages/LoginPage";
+import PerformancePage from "./pages/PerformancePage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ReleasesPage from "./pages/ReleasesPage";
 import SetupPage from "./pages/SetupPage";
@@ -103,6 +104,7 @@ function Shell({ user, onSignedOut }: { user: CurrentUser; onSignedOut: () => Pr
           <Route path="/:orgSlug/projects" element={<ProjectsPage />} />
           <Route path="/:orgSlug/projects/new" element={<CreateProjectPage />} />
           <Route path="/:orgSlug/:projectSlug/releases" element={<ReleasesPage />} />
+          <Route path="/:orgSlug/:projectSlug/performance" element={<PerformancePage />} />
           <Route path="/:orgSlug/:projectSlug/settings/alerts" element={<AlertSettingsPage />} />
           <Route path="/:orgSlug/:projectSlug" element={<IssuesPage />} />
           <Route path="/:orgSlug/:projectSlug/issues/:issueId" element={<IssueDetailPage />} />

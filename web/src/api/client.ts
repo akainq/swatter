@@ -12,6 +12,7 @@ export type SetupRequest = components["schemas"]["SetupRequest"];
 export type Release = components["schemas"]["Release"];
 export type ReleaseDetail = components["schemas"]["ReleaseDetail"];
 export type AIAnalysis = components["schemas"]["AIAnalysis"];
+export type TransactionStat = components["schemas"]["TransactionStat"];
 export type AlertSettings = components["schemas"]["AlertSettings"];
 export type AlertSettingsUpdate = components["schemas"]["AlertSettingsUpdateRequest"];
 
@@ -142,6 +143,11 @@ export const updateIssueStatus = (issueId: string, status: Issue["status"]) =>
 // опрашивается повторными fetchIssue
 export const analyzeIssue = (issueId: string) =>
   api<AIAnalysis>(`/api/0/issues/${issueId}/analyze`, { method: "POST" });
+
+export const fetchTransactionStats = (orgSlug: string, projectSlug: string, window: string) =>
+  api<TransactionStat[]>(
+    `/api/0/projects/${orgSlug}/${projectSlug}/performance/transactions?window=${window}`,
+  );
 
 export const fetchAlertSettings = (orgSlug: string, projectSlug: string) =>
   api<AlertSettings>(`/api/0/projects/${orgSlug}/${projectSlug}/alert-settings`);

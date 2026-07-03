@@ -277,6 +277,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/0/projects/{org_slug}/{project_slug}/performance/transactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Агрегаты по транзакциям проекта (ADR-0014, на лету из CH) */
+        get: operations["SwatterWeb.PerformanceController.transactions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/0/projects/{org_slug}/{project_slug}/releases": {
         parameters: {
             query?: never;
@@ -527,6 +544,24 @@ export interface components {
             key: string;
             value: string;
         };
+        /**
+         * TransactionStat
+         * @description Агрегат по транзакции за окно (ADR-0014)
+         */
+        TransactionStat: {
+            count: number;
+            /** Format: date-time */
+            lastSeen: string;
+            /** @description медиана длительности, мс */
+            p50: number;
+            /** @description 95-й перцентиль длительности, мс */
+            p95: number;
+            /** @description запросов в минуту за окно */
+            rpm: number;
+            transaction: string;
+        };
+        /** TransactionStatList */
+        TransactionStatList: components["schemas"]["TransactionStat"][];
     };
     responses: never;
     parameters: never;
@@ -1224,6 +1259,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Проект не найден */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    "SwatterWeb.PerformanceController.transactions": {
+        parameters: {
+            query?: {
+                window?: "1h" | "24h" | "7d";
+            };
+            header?: never;
+            path: {
+                org_slug: string;
+                project_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Транзакции */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TransactionStatList"];
                 };
             };
             /** @description Проект не найден */

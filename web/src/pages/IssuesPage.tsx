@@ -148,6 +148,9 @@ export default function IssuesPage() {
               </option>
             ))}
           </select>
+          <Link to={`/${orgSlug}/${projectSlug}/performance`} className="btn">
+            Performance
+          </Link>
           <Link to={`/${orgSlug}/${projectSlug}/releases`} className="btn">
             Releases
           </Link>

@@ -741,3 +741,40 @@ input:focus,
 .project-actions .btn.wide {
   flex: 1;
 }
+
+/* performance (ADR-0014) */
+
+.perf-table {
+  width: 100%;
+  border-collapse: collapse;
+  padding: 0;
+}
+
+.perf-table th,
+.perf-table td {
+  padding: 0.55rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.perf-table th {
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.perf-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.perf-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.perf-name {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 0.9rem;
+}

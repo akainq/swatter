@@ -281,6 +281,33 @@ defmodule SwatterWeb.ApiSchemas do
     })
   end
 
+  defmodule TransactionStat do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "TransactionStat",
+      description: "Агрегат по транзакции за окно (ADR-0014)",
+      type: :object,
+      properties: %{
+        transaction: %Schema{type: :string},
+        count: %Schema{type: :integer},
+        rpm: %Schema{type: :number, description: "запросов в минуту за окно"},
+        p50: %Schema{type: :number, description: "медиана длительности, мс"},
+        p95: %Schema{type: :number, description: "95-й перцентиль длительности, мс"},
+        lastSeen: %Schema{type: :string, format: :"date-time"}
+      },
+      required: [:transaction, :count, :rpm, :p50, :p95, :lastSeen]
+    })
+  end
+
+  defmodule TransactionStatList do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "TransactionStatList",
+      type: :array,
+      items: SwatterWeb.ApiSchemas.TransactionStat
+    })
+  end
+
   defmodule AlertSettings do
     @moduledoc false
     OpenApiSpex.schema(%{

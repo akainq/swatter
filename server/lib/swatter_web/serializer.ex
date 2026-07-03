@@ -60,6 +60,17 @@ defmodule SwatterWeb.Serializer do
     }
   end
 
+  def transaction_stat(stat) do
+    %{
+      "transaction" => stat.transaction,
+      "count" => stat.count,
+      "rpm" => Float.round(stat.rpm, 3),
+      "p50" => Float.round(stat.p50 * 1.0, 2),
+      "p95" => Float.round(stat.p95 * 1.0, 2),
+      "lastSeen" => DateTime.to_iso8601(stat.last_seen)
+    }
+  end
+
   def ai_analysis(nil), do: nil
 
   def ai_analysis(analysis) do
