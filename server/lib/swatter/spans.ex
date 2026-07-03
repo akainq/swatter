@@ -44,4 +44,54 @@ defmodule Swatter.Spans do
     minutes = seconds / 60
     Enum.map(rows, &Map.put(&1, :rpm, &1.count / minutes))
   end
+
+  @traces_limit 50
+
+  @doc """
+  Последние трейсы транзакции (корневые сегменты) за окно.
+  `sort`: `"slow"` (по длительности, дефолт) | `"recent"`.
+  """
+  def recent_traces(project_id, transaction_name, opts \\ []) do
+    window = Keyword.get(opts, :window, @default_window)
+    seconds = Map.get(@windows, window, @windows[@default_window])
+    since = DateTime.add(DateTime.utc_now(), -seconds, :second)
+
+    query =
+      from s in Span,
+        where:
+          s.project_id == ^project_id and s.is_segment == 1 and
+            s.transaction_name == ^transaction_name and s.start_ts > ^since,
+        limit: @traces_limit,
+        select: %{
+          trace_id: s.trace_id,
+          start_ts: s.start_ts,
+          duration_ms: s.duration_ms,
+          status: s.status,
+          environment: s.environment,
+          release: s.release
+        }
+
+    query =
+      case Keyword.get(opts, :sort, "slow") do
+        "recent" -> order_by(query, [s], desc: s.start_ts)
+        _slow -> order_by(query, [s], desc: s.duration_ms)
+      end
+
+    EventsRepo.all(query)
+  end
+
+  @trace_spans_limit 1000
+
+  @doc """
+  Все спаны трейса по организации (кросс-проектно — фронт↔бэк↔микросервисы),
+  в порядке старта. Bloom-index по trace_id держит выборку точечной.
+  """
+  def trace_spans(org_id, trace_id) do
+    EventsRepo.all(
+      from s in Span,
+        where: s.org_id == ^org_id and s.trace_id == ^trace_id,
+        order_by: [asc: s.start_ts, asc: s.span_id],
+        limit: @trace_spans_limit
+    )
+  end
 end

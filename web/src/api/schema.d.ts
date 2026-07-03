@@ -180,6 +180,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/0/organizations/{org_slug}/traces/{trace_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Спаны трейса по организации (кросс-проектно, ADR-0014) */
+        get: operations["SwatterWeb.PerformanceController.trace"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/0/projects/{org_slug}/{project_slug}": {
         parameters: {
             query?: never;
@@ -269,6 +286,23 @@ export interface paths {
          * @description Сортировки: date (last_seen), new (first_seen), freq (times_seen).
          */
         get: operations["SwatterWeb.IssueController.index"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/0/projects/{org_slug}/{project_slug}/performance/traces": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Последние трейсы транзакции (корневые сегменты) */
+        get: operations["SwatterWeb.PerformanceController.traces"];
         put?: never;
         post?: never;
         delete?: never;
@@ -544,6 +578,43 @@ export interface components {
             key: string;
             value: string;
         };
+        /**
+         * Trace
+         * @description Спаны трейса по всем проектам организации (ADR-0014)
+         */
+        Trace: {
+            spans: components["schemas"]["TraceSpan"][];
+            traceId: string;
+        };
+        /** TraceSpan */
+        TraceSpan: {
+            description?: string;
+            durationMs: number;
+            /** Format: date-time */
+            endTs: string;
+            isSegment: boolean;
+            op: string;
+            parentSpanId: string;
+            projectId?: string;
+            projectSlug?: string | null;
+            spanId: string;
+            /** Format: date-time */
+            startTs: string;
+            status?: string;
+            transaction?: string;
+        };
+        /** TraceSummary */
+        TraceSummary: {
+            durationMs: number;
+            environment?: string;
+            release?: string;
+            /** Format: date-time */
+            startTs: string;
+            status?: string;
+            traceId: string;
+        };
+        /** TraceSummaryList */
+        TraceSummaryList: components["schemas"]["TraceSummary"][];
         /**
          * TransactionStat
          * @description Агрегат по транзакции за окно (ADR-0014)
@@ -1001,6 +1072,38 @@ export interface operations {
             };
         };
     };
+    "SwatterWeb.PerformanceController.trace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_slug: string;
+                trace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Трейс */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Trace"];
+                };
+            };
+            /** @description Трейс не найден */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     "SwatterWeb.ProjectController.update": {
         parameters: {
             query?: never;
@@ -1259,6 +1362,42 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Проект не найден */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    "SwatterWeb.PerformanceController.traces": {
+        parameters: {
+            query: {
+                transaction: string;
+                window?: "1h" | "24h" | "7d";
+                sort?: "slow" | "recent";
+            };
+            header?: never;
+            path: {
+                org_slug: string;
+                project_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Трейсы */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TraceSummaryList"];
                 };
             };
             /** @description Проект не найден */

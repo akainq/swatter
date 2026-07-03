@@ -19,19 +19,19 @@ defmodule SwatterWeb.PerformanceApiTest do
 
   defp insert_segment!(project, name, duration_ms, opts \\ []) do
     at = Keyword.get(opts, :at, DateTime.utc_now())
-    span_id = random_hex(16)
+    span_id = Keyword.get(opts, :span_id, random_hex(16))
 
     EventsRepo.insert_all(Span, [
       %{
         org_id: project.organization_id,
         project_id: project.id,
-        trace_id: random_hex(32),
+        trace_id: Keyword.get(opts, :trace_id, random_hex(32)),
         span_id: span_id,
-        parent_span_id: "",
-        segment_id: span_id,
+        parent_span_id: Keyword.get(opts, :parent_span_id, ""),
+        segment_id: Keyword.get(opts, :segment_id, span_id),
         is_segment: Keyword.get(opts, :is_segment, 1),
         transaction_name: name,
-        op: "http.server",
+        op: Keyword.get(opts, :op, "http.server"),
         description: name,
         status: "ok",
         start_ts: at,
@@ -109,5 +109,74 @@ defmodule SwatterWeb.PerformanceApiTest do
 
     conn = get(conn, "/api/0/projects/#{org.slug}/#{project.slug}/performance/transactions")
     assert json_response(conn, 404)
+  end
+
+  test "traces: сегменты транзакции, медленные сверху", %{
+    conn: conn,
+    org: org,
+    project: project
+  } do
+    insert_segment!(project, "GET /a", 100)
+    insert_segment!(project, "GET /a", 300)
+    insert_segment!(project, "GET /a", 200)
+    insert_segment!(project, "GET /other", 999)
+
+    body =
+      conn
+      |> get(
+        "/api/0/projects/#{org.slug}/#{project.slug}/performance/traces?" <>
+          URI.encode_query(transaction: "GET /a")
+      )
+      |> json_response(200)
+
+    assert_schema(body, "TraceSummaryList", api_spec())
+    assert Enum.map(body, & &1["durationMs"]) == [300.0, 200.0, 100.0]
+  end
+
+  test "trace: спаны по организации кросс-проектно; чужая организация — 404", %{
+    conn: conn,
+    org: org,
+    project: project
+  } do
+    trace_id = random_hex(32)
+    segment_id = random_hex(16)
+
+    # фронтовый сегмент в этом проекте + бэкендовый в соседнем проекте той же org
+    insert_segment!(project, "pageload /checkout", 400,
+      trace_id: trace_id,
+      span_id: segment_id
+    )
+
+    insert_segment!(project, "fetch /api/pay", 120,
+      trace_id: trace_id,
+      is_segment: 0,
+      parent_span_id: segment_id,
+      segment_id: segment_id,
+      op: "http.client"
+    )
+
+    {backend, _} = project_fixture(org)
+    insert_segment!(backend, "POST /api/pay", 90, trace_id: trace_id)
+
+    body =
+      conn |> get("/api/0/organizations/#{org.slug}/traces/#{trace_id}") |> json_response(200)
+
+    assert_schema(body, "Trace", api_spec())
+
+    assert body["traceId"] == trace_id
+    assert length(body["spans"]) == 3
+
+    slugs = body["spans"] |> Enum.map(& &1["projectSlug"]) |> Enum.uniq() |> Enum.sort()
+    assert slugs == Enum.sort([project.slug, backend.slug])
+
+    # участник другой организации трейс не видит
+    stranger = member_fixture(org_fixture())
+    other_conn = log_in_user(Phoenix.ConnTest.build_conn(), stranger)
+    other_conn = get(other_conn, "/api/0/organizations/#{org.slug}/traces/#{trace_id}")
+    assert json_response(other_conn, 404)
+
+    # несуществующий трейс — 404
+    empty = get(conn, "/api/0/organizations/#{org.slug}/traces/#{random_hex(32)}")
+    assert json_response(empty, 404)
   end
 end

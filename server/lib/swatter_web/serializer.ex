@@ -71,6 +71,34 @@ defmodule SwatterWeb.Serializer do
     }
   end
 
+  def trace_summary(row) do
+    %{
+      "traceId" => row.trace_id,
+      "startTs" => DateTime.to_iso8601(row.start_ts),
+      "durationMs" => Float.round(row.duration_ms * 1.0, 2),
+      "status" => row.status,
+      "environment" => row.environment,
+      "release" => row.release
+    }
+  end
+
+  def trace_span(span, project_slugs) do
+    %{
+      "spanId" => span.span_id,
+      "parentSpanId" => span.parent_span_id,
+      "isSegment" => span.is_segment == 1,
+      "transaction" => span.transaction_name,
+      "op" => span.op,
+      "description" => span.description,
+      "status" => span.status,
+      "startTs" => DateTime.to_iso8601(span.start_ts),
+      "endTs" => DateTime.to_iso8601(span.end_ts),
+      "durationMs" => Float.round(span.duration_ms * 1.0, 2),
+      "projectId" => to_string(span.project_id),
+      "projectSlug" => Map.get(project_slugs, span.project_id)
+    }
+  end
+
   def ai_analysis(nil), do: nil
 
   def ai_analysis(analysis) do

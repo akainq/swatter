@@ -308,6 +308,69 @@ defmodule SwatterWeb.ApiSchemas do
     })
   end
 
+  defmodule TraceSummary do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "TraceSummary",
+      type: :object,
+      properties: %{
+        traceId: %Schema{type: :string},
+        startTs: %Schema{type: :string, format: :"date-time"},
+        durationMs: %Schema{type: :number},
+        status: %Schema{type: :string},
+        environment: %Schema{type: :string},
+        release: %Schema{type: :string}
+      },
+      required: [:traceId, :startTs, :durationMs]
+    })
+  end
+
+  defmodule TraceSummaryList do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "TraceSummaryList",
+      type: :array,
+      items: SwatterWeb.ApiSchemas.TraceSummary
+    })
+  end
+
+  defmodule TraceSpan do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "TraceSpan",
+      type: :object,
+      properties: %{
+        spanId: %Schema{type: :string},
+        parentSpanId: %Schema{type: :string},
+        isSegment: %Schema{type: :boolean},
+        transaction: %Schema{type: :string},
+        op: %Schema{type: :string},
+        description: %Schema{type: :string},
+        status: %Schema{type: :string},
+        startTs: %Schema{type: :string, format: :"date-time"},
+        endTs: %Schema{type: :string, format: :"date-time"},
+        durationMs: %Schema{type: :number},
+        projectId: %Schema{type: :string},
+        projectSlug: %Schema{type: :string, nullable: true}
+      },
+      required: [:spanId, :parentSpanId, :isSegment, :op, :startTs, :endTs, :durationMs]
+    })
+  end
+
+  defmodule Trace do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "Trace",
+      description: "Спаны трейса по всем проектам организации (ADR-0014)",
+      type: :object,
+      properties: %{
+        traceId: %Schema{type: :string},
+        spans: %Schema{type: :array, items: SwatterWeb.ApiSchemas.TraceSpan}
+      },
+      required: [:traceId, :spans]
+    })
+  end
+
   defmodule AlertSettings do
     @moduledoc false
     OpenApiSpex.schema(%{

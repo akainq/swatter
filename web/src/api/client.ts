@@ -13,6 +13,9 @@ export type Release = components["schemas"]["Release"];
 export type ReleaseDetail = components["schemas"]["ReleaseDetail"];
 export type AIAnalysis = components["schemas"]["AIAnalysis"];
 export type TransactionStat = components["schemas"]["TransactionStat"];
+export type TraceSummary = components["schemas"]["TraceSummary"];
+export type Trace = components["schemas"]["Trace"];
+export type TraceSpan = components["schemas"]["TraceSpan"];
 export type AlertSettings = components["schemas"]["AlertSettings"];
 export type AlertSettingsUpdate = components["schemas"]["AlertSettingsUpdateRequest"];
 
@@ -148,6 +151,21 @@ export const fetchTransactionStats = (orgSlug: string, projectSlug: string, wind
   api<TransactionStat[]>(
     `/api/0/projects/${orgSlug}/${projectSlug}/performance/transactions?window=${window}`,
   );
+
+export const fetchTransactionTraces = (
+  orgSlug: string,
+  projectSlug: string,
+  transaction: string,
+  window: string,
+  sort: string,
+) =>
+  api<TraceSummary[]>(
+    `/api/0/projects/${orgSlug}/${projectSlug}/performance/traces?` +
+      new URLSearchParams({ transaction, window, sort }).toString(),
+  );
+
+export const fetchTrace = (orgSlug: string, traceId: string) =>
+  api<Trace>(`/api/0/organizations/${orgSlug}/traces/${traceId}`);
 
 export const fetchAlertSettings = (orgSlug: string, projectSlug: string) =>
   api<AlertSettings>(`/api/0/projects/${orgSlug}/${projectSlug}/alert-settings`);

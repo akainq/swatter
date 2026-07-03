@@ -778,3 +778,113 @@ input:focus,
   font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
   font-size: 0.9rem;
 }
+
+/* trace list & waterfall (ADR-0014) */
+
+.trace-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 90px auto auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  margin-bottom: 0.4rem;
+}
+
+.trace-row:hover {
+  border-color: var(--accent);
+}
+
+.trace-bar-cell {
+  position: relative;
+  height: 8px;
+  background: var(--panel-2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.trace-bar {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 4px;
+}
+
+.waterfall {
+  padding: 0.6rem 1rem;
+}
+
+.wf-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 34%) 1fr;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.25rem 0;
+  border-bottom: 1px dashed var(--border);
+}
+
+.wf-row:last-child {
+  border-bottom: none;
+}
+
+.wf-label {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.wf-op {
+  color: var(--muted);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.wf-op.segment {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.wf-desc {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wf-track {
+  position: relative;
+  height: 18px;
+  background: var(--panel-2);
+  border-radius: 4px;
+}
+
+.wf-bar {
+  position: absolute;
+  top: 3px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--info);
+  min-width: 2px;
+}
+
+.wf-bar.segment {
+  background: var(--accent);
+}
+
+.wf-ms {
+  position: absolute;
+  top: 1px;
+  margin-left: 6px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.badge.project-badge {
+  background: color-mix(in srgb, var(--info) 25%, transparent);
+  color: var(--info);
+}

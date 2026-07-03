@@ -80,7 +80,15 @@ export default function PerformancePage() {
           <tbody>
             {stats.map((stat) => (
               <tr key={stat.transaction}>
-                <td className="perf-name">{stat.transaction}</td>
+                <td className="perf-name">
+                  <Link
+                    to={`/${orgSlug}/${projectSlug}/performance/transaction?${new URLSearchParams(
+                      { name: stat.transaction, window },
+                    ).toString()}`}
+                  >
+                    {stat.transaction}
+                  </Link>
+                </td>
                 <td className="num">{stat.rpm}</td>
                 <td className="num">{stat.p50}</td>
                 <td className="num">{stat.p95}</td>

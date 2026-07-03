@@ -920,6 +920,165 @@
         "x-struct": "Elixir.SwatterWeb.ApiSchemas.TagEntry",
         "x-validate": null
       },
+      "Trace": {
+        "description": "Спаны трейса по всем проектам организации (ADR-0014)",
+        "properties": {
+          "spans": {
+            "items": {
+              "$ref": "#/components/schemas/TraceSpan"
+            },
+            "type": "array",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "traceId": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "traceId",
+          "spans"
+        ],
+        "title": "Trace",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.Trace",
+        "x-validate": null
+      },
+      "TraceSpan": {
+        "properties": {
+          "description": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "durationMs": {
+            "type": "number",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "endTs": {
+            "format": "date-time",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "isSegment": {
+            "type": "boolean",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "op": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "parentSpanId": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "projectId": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "projectSlug": {
+            "nullable": true,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "spanId": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "startTs": {
+            "format": "date-time",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "status": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "transaction": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "spanId",
+          "parentSpanId",
+          "isSegment",
+          "op",
+          "startTs",
+          "endTs",
+          "durationMs"
+        ],
+        "title": "TraceSpan",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.TraceSpan",
+        "x-validate": null
+      },
+      "TraceSummary": {
+        "properties": {
+          "durationMs": {
+            "type": "number",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "environment": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "release": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "startTs": {
+            "format": "date-time",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "status": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "traceId": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "traceId",
+          "startTs",
+          "durationMs"
+        ],
+        "title": "TraceSummary",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.TraceSummary",
+        "x-validate": null
+      },
+      "TraceSummaryList": {
+        "items": {
+          "$ref": "#/components/schemas/TraceSummary"
+        },
+        "title": "TraceSummaryList",
+        "type": "array",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.TraceSummaryList",
+        "x-validate": null
+      },
       "TransactionStat": {
         "description": "Агрегат по транзакции за окно (ADR-0014)",
         "properties": {
@@ -1588,6 +1747,62 @@
         ]
       }
     },
+    "/api/0/organizations/{org_slug}/traces/{trace_id}": {
+      "get": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.PerformanceController.trace",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "",
+            "in": "path",
+            "name": "trace_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Trace"
+                }
+              }
+            },
+            "description": "Трейс"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Трейс не найден"
+          }
+        },
+        "summary": "Спаны трейса по организации (кросс-проектно, ADR-0014)",
+        "tags": [
+          "performance"
+        ]
+      }
+    },
     "/api/0/projects/{org_slug}/{project_slug}": {
       "put": {
         "callbacks": {},
@@ -2131,6 +2346,106 @@
         "summary": "Issues проекта",
         "tags": [
           "issues"
+        ]
+      }
+    },
+    "/api/0/projects/{org_slug}/{project_slug}/performance/traces": {
+      "get": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.PerformanceController.traces",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "",
+            "in": "path",
+            "name": "project_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "",
+            "in": "query",
+            "name": "transaction",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "",
+            "in": "query",
+            "name": "window",
+            "required": false,
+            "schema": {
+              "default": "24h",
+              "enum": [
+                "1h",
+                "24h",
+                "7d"
+              ],
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "",
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "slow",
+              "enum": [
+                "slow",
+                "recent"
+              ],
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TraceSummaryList"
+                }
+              }
+            },
+            "description": "Трейсы"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Проект не найден"
+          }
+        },
+        "summary": "Последние трейсы транзакции (корневые сегменты)",
+        "tags": [
+          "performance"
         ]
       }
     },
