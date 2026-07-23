@@ -10,18 +10,25 @@ RUN bun run build
 
 # --- 2. Сборка Elixir-релиза -------------------------------------------------
 FROM elixir:1.20-otp-29 AS build
-# hex.pm из сборочных сетей бывает нестабилен (таймауты к Fastly): щадящий
-# HTTP-таймаут + меньше параллельных соединений + ретраи на сетевых шагах
-ENV MIX_ENV=prod LANG=C.UTF-8 HEX_HTTP_TIMEOUT=120 HEX_HTTP_CONCURRENCY=2
+# builds.hex.pm / repo.hex.pm (Fastly) из некоторых сетей стабильно таймаутят,
+# а 60-секундный таймаут загрузок mix local.hex / mix local.rebar вообще не
+# настраивается (HEX_HTTP_TIMEOUT на него не влияет). Поэтому hex и rebar3
+# ставим из GitHub, который с тех же хостов работает, а deps.get идёт с
+# щадящим таймаутом, без параллелизма и с ретраями.
+ENV MIX_ENV=prod LANG=C.UTF-8 HEX_HTTP_TIMEOUT=300 HEX_HTTP_CONCURRENCY=1
 WORKDIR /app
 
-RUN i=0; until mix local.hex --force && mix local.rebar --force; do \
-      i=$((i+1)); [ $i -ge 3 ] && exit 1; echo "hex bootstrap retry $i"; sleep 5; \
+RUN i=0; until mix archive.install github hexpm/hex tag v2.5.1 --force; do \
+      i=$((i+1)); [ $i -ge 3 ] && exit 1; echo "hex install retry $i"; sleep 5; \
     done
+RUN curl -fsSL --retry 5 --retry-delay 5 -o /usr/local/bin/rebar3 \
+      https://github.com/erlang/rebar3/releases/download/3.27.0/rebar3 \
+    && chmod +x /usr/local/bin/rebar3
+ENV MIX_REBAR3=/usr/local/bin/rebar3
 
 COPY server/mix.exs server/mix.lock ./
 RUN i=0; until mix deps.get --only prod; do \
-      i=$((i+1)); [ $i -ge 5 ] && exit 1; echo "deps.get retry $i"; sleep 10; \
+      i=$((i+1)); [ $i -ge 5 ] && exit 1; echo "deps.get retry $i"; sleep 15; \
     done
 
 COPY server/config config

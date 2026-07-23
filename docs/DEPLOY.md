@@ -73,20 +73,30 @@ docker compose -f docker-compose.prod.yaml up -d --build
 
 ## Сборка падает на hex.pm (`:timeout`, «Unknown package … in lockfile»)
 
-Симптом: `mix local.hex` или `mix deps.get` в docker-сборке висят ~15 с на запрос и
-падают (`Failed to fetch record … :timeout`; «Unknown package X in lockfile» — следствие
-недокачанного реестра, lockfile ни при чём). Сам Dockerfile уже ретраит эти шаги и
-поднимает `HEX_HTTP_TIMEOUT`, так что редкие флапы сборку не роняют. Если падает стабильно —
-у хоста нестабильный маршрут до hex.pm (Fastly), чаще всего битый IPv6 (адрес есть,
-маршрута нет → каждый запрос ждёт таймаут IPv6 перед фолбэком на IPv4):
+Симптом: сетевые шаги docker-сборки, ходящие на `builds.hex.pm` / `repo.hex.pm`
+(Fastly), таймаутят (`request timed out`, `Failed to fetch record … :timeout`;
+«Unknown package X in lockfile» — следствие недокачанного реестра, lockfile ни
+при чём). У некоторых хостингов маршрут до Fastly деградирован, при этом GitHub
+работает нормально — характерный признак: git clone в том же билде проходит за
+секунды, а hex.pm висит.
+
+Что уже сделано в Dockerfile:
+
+- hex и rebar3 ставятся **из GitHub** (`mix archive.install github hexpm/hex`,
+  бинарь rebar3 из releases + `MIX_REBAR3`) — `builds.hex.pm` не используется
+  вовсе. Это важно: у загрузок `mix local.hex` / `mix local.rebar` жёсткий
+  таймаут 60 с, который не настраивается (`HEX_HTTP_TIMEOUT` на них не влияет).
+- `mix deps.get` (единственный оставшийся поход на Fastly, `repo.hex.pm`) идёт
+  с `HEX_HTTP_TIMEOUT=300`, `HEX_HTTP_CONCURRENCY=1` и пятью ретраями — медленный
+  маршрут он переживает, полностью мёртвый нет.
+
+Если `deps.get` стабильно падает и на таком режиме, проверьте маршрут с хоста:
 
 ```sh
-# диагностика
-ip -6 addr show scope global; ip -6 route show default
-docker run --rm elixir:1.20-otp-29 bash -lc 'time mix local.hex --force'
-
-# лечение: отключить IPv6 и перезапустить docker
-printf 'net.ipv6.conf.all.disable_ipv6=1\nnet.ipv6.conf.default.disable_ipv6=1\n' \
-  | sudo tee /etc/sysctl.d/99-disable-ipv6.conf
-sudo sysctl --system && sudo systemctl restart docker
+docker run --rm elixir:1.20-otp-29 bash -lc \
+  'mix archive.install github hexpm/hex tag v2.5.1 --force && time mix hex.package fetch jason 1.4.4 -o /tmp/j.tar'
 ```
+
+Обходной путь — собрать образ на машине с нормальной сетью и деплоить готовый
+образ через registry (в Coolify — ресурс типа «Docker Image» вместо сборки из
+репозитория).
