@@ -2,6 +2,7 @@ defmodule SwatterWeb.DashboardApiTest do
   # async: false — тесты событий делят таблицу events в ClickHouse
   use SwatterWeb.ConnCase, async: false
 
+  import Ecto.Query
   import OpenApiSpex.TestAssertions
   import Swatter.AccountsFixtures
   import Swatter.EventFixtures
@@ -284,6 +285,81 @@ defmodule SwatterWeb.DashboardApiTest do
       assert conn
              |> post("/api/0/organizations/#{foreign.slug}/projects", %{name: "X", slug: "x"})
              |> json_response(404)
+    end
+  end
+
+  describe "DELETE /api/0/projects/:org_slug/:project_slug" do
+    test "удаляет проект: каскад в PG + зачистка событий и спанов в CH", %{
+      conn: conn,
+      org: org,
+      project: project
+    } do
+      issue = create_issue(project, "delete-me")
+      :ok = insert_ch_event(project, issue, String.duplicate("d", 32), @received_at)
+
+      span_id = String.duplicate("ab", 8)
+
+      {1, _} =
+        EventsRepo.insert_all(Swatter.Spans.Span, [
+          %{
+            org_id: project.organization_id,
+            project_id: project.id,
+            trace_id: String.duplicate("cd", 16),
+            span_id: span_id,
+            parent_span_id: "",
+            segment_id: span_id,
+            is_segment: 1,
+            transaction_name: "GET /gone",
+            op: "http.server",
+            description: "GET /gone",
+            status: "ok",
+            start_ts: @received_at,
+            end_ts: @received_at,
+            duration_ms: 1.0,
+            environment: "test",
+            release: "",
+            platform: "node",
+            tags: %{},
+            received_at: @received_at
+          }
+        ])
+
+      assert conn |> delete("/api/0/projects/#{org.slug}/#{project.slug}") |> response(204)
+
+      assert Swatter.Repo.get(Swatter.Projects.Project, project.id) == nil
+      assert Swatter.Repo.get(Issues.Issue, issue.id) == nil
+
+      assert Swatter.Repo.all(
+               from k in Swatter.Projects.ProjectKey,
+                 where: k.project_id == ^project.id,
+                 select: count(k.id)
+             ) == [0]
+
+      assert EventsRepo.all(
+               from e in Swatter.Events.Event,
+                 where: e.project_id == ^project.id,
+                 select: count(e.event_id)
+             ) == [0]
+
+      assert EventsRepo.all(
+               from s in Swatter.Spans.Span,
+                 where: s.project_id == ^project.id,
+                 select: count(s.span_id)
+             ) == [0]
+
+      # повторное удаление — проект уже не существует
+      assert conn |> delete("/api/0/projects/#{org.slug}/#{project.slug}") |> json_response(404)
+    end
+
+    test "чужой проект неотличим от несуществующего и не удаляется", %{conn: conn} do
+      {foreign, _key} = project_fixture()
+      foreign_org = Swatter.Repo.get!(Swatter.Projects.Organization, foreign.organization_id)
+
+      assert conn
+             |> delete("/api/0/projects/#{foreign_org.slug}/#{foreign.slug}")
+             |> json_response(404)
+
+      assert Swatter.Repo.get(Swatter.Projects.Project, foreign.id)
     end
   end
 

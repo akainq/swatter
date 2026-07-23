@@ -260,7 +260,8 @@ export interface paths {
         /** Переименовать проект (slug неизменяем) */
         put: operations["SwatterWeb.ProjectController.update"];
         post?: never;
-        delete?: never;
+        /** Удалить проект со всеми данными (issues, события, релизы, DSN) */
+        delete: operations["SwatterWeb.ProjectController.delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1347,6 +1348,36 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Error"];
                 };
+            };
+            /** @description Проект не найден */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    "SwatterWeb.ProjectController.delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                org_slug: string;
+                project_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Удалён */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Проект не найден */
             404: {

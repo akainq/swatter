@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
-import { ApiError, fetchProjects, updateProject } from "../api/client";
+import { ApiError, deleteProject, fetchProjects, updateProject } from "../api/client";
 import type { Project } from "../api/client";
 
 export default function ProjectsPage() {
@@ -31,6 +31,10 @@ export default function ProjectsPage() {
     setProjects((current) => current.map((p) => (p.slug === updated.slug ? { ...p, ...updated } : p)));
   };
 
+  const onDeleted = (slug: string) => {
+    setProjects((current) => current.filter((p) => p.slug !== slug));
+  };
+
   return (
     <div className="page">
       <div className="page-header">
@@ -48,7 +52,13 @@ export default function ProjectsPage() {
 
       <div className="project-grid">
         {projects.map((project) => (
-          <ProjectCard key={project.slug} orgSlug={orgSlug} project={project} onRenamed={onRenamed} />
+          <ProjectCard
+            key={project.slug}
+            orgSlug={orgSlug}
+            project={project}
+            onRenamed={onRenamed}
+            onDeleted={onDeleted}
+          />
         ))}
       </div>
     </div>
@@ -59,16 +69,32 @@ function ProjectCard({
   orgSlug,
   project,
   onRenamed,
+  onDeleted,
 }: {
   orgSlug: string;
   project: Project;
   onRenamed: (p: Project) => void;
+  onDeleted: (slug: string) => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(project.name);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [confirmSlug, setConfirmSlug] = useState("");
+
+  const remove = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      await deleteProject(orgSlug, project.slug);
+      onDeleted(project.slug);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : String(err));
+      setBusy(false);
+    }
+  };
 
   const save = async () => {
     setBusy(true);
@@ -146,14 +172,50 @@ function ProjectCard({
         </div>
       )}
 
-      <div className="project-actions">
-        <Link to={`/${orgSlug}/${project.slug}`} className="btn wide">
-          Open issues
-        </Link>
-        <Link to={`/${orgSlug}/${project.slug}/settings/alerts`} className="btn">
-          Alerts
-        </Link>
-      </div>
+      {confirmingDelete ? (
+        <div className="delete-confirm">
+          <p className="error-text small">
+            This permanently deletes the project with all its issues, events, releases and DSN
+            keys. Type <b>{project.slug}</b> to confirm.
+          </p>
+          <div className="rename-row">
+            <input
+              value={confirmSlug}
+              onChange={(e) => setConfirmSlug(e.target.value)}
+              placeholder={project.slug}
+              autoFocus
+            />
+            <button
+              className="btn danger"
+              disabled={busy || confirmSlug !== project.slug}
+              onClick={() => void remove()}
+            >
+              Delete
+            </button>
+            <button
+              className="btn"
+              onClick={() => {
+                setConfirmingDelete(false);
+                setConfirmSlug("");
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="project-actions">
+          <Link to={`/${orgSlug}/${project.slug}`} className="btn wide">
+            Open issues
+          </Link>
+          <Link to={`/${orgSlug}/${project.slug}/settings/alerts`} className="btn">
+            Alerts
+          </Link>
+          <button className="btn danger-outline" onClick={() => setConfirmingDelete(true)}>
+            Delete
+          </button>
+        </div>
+      )}
     </div>
   );
 }

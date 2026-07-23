@@ -2126,6 +2126,53 @@
       }
     },
     "/api/0/projects/{org_slug}/{project_slug}": {
+      "delete": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.ProjectController.delete",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "org_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          },
+          {
+            "description": "",
+            "in": "path",
+            "name": "project_slug",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Удалён"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Проект не найден"
+          }
+        },
+        "summary": "Удалить проект со всеми данными (issues, события, релизы, DSN)",
+        "tags": [
+          "projects"
+        ]
+      },
       "put": {
         "callbacks": {},
         "operationId": "SwatterWeb.ProjectController.update",

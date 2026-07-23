@@ -93,6 +93,7 @@ defmodule SwatterWeb.Router do
     get "/organizations/:org_slug/projects", ProjectController, :index
     post "/organizations/:org_slug/projects", ProjectController, :create
     put "/projects/:org_slug/:project_slug", ProjectController, :update
+    delete "/projects/:org_slug/:project_slug", ProjectController, :delete
     get "/projects/:org_slug/:project_slug/issues", IssueController, :index
     get "/projects/:org_slug/:project_slug/filters", IssueController, :filters
     get "/projects/:org_slug/:project_slug/releases", ReleaseController, :index

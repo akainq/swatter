@@ -5,6 +5,8 @@ defmodule Swatter.Projects do
 
   import Ecto.Query
 
+  require Logger
+
   alias Ecto.Multi
   alias Swatter.Projects.{Organization, Project, ProjectKey}
   alias Swatter.Repo
@@ -96,6 +98,35 @@ defmodule Swatter.Projects do
 
   def update_project(%Project{} = project, attrs) do
     project |> Project.update_changeset(attrs) |> Repo.update()
+  end
+
+  @doc """
+  Удаляет проект целиком. PG каскадит ключи/issues/релизы/артефакты/настройки
+  алертов (FK `on_delete: :delete_all`), затем best-effort зачистка ClickHouse
+  (lightweight DELETE по project_id в events и spans). Если CH недоступен,
+  остаются недостижимые строки: все чтения скоупятся project_id из PG.
+  События проекта, ещё висящие в ingest-буфере, пайплайн отбросит сам после
+  исчерпания redelivery (ключи DSN умирают вместе с проектом).
+  """
+  def delete_project(%Project{} = project) do
+    {:ok, _} = Repo.delete(project)
+    purge_project_events(project.id)
+    :ok
+  end
+
+  defp purge_project_events(project_id) when is_integer(project_id) do
+    for table <- ["events", "spans"] do
+      Swatter.EventsRepo.query!("DELETE FROM #{table} WHERE project_id = #{project_id}")
+    end
+
+    :ok
+  rescue
+    error ->
+      Logger.warning(
+        "ClickHouse purge failed for project #{project_id}: #{Exception.message(error)}"
+      )
+
+      :ok
   end
 
   def get_organization_by_slug(slug), do: Repo.get_by(Organization, slug: slug)

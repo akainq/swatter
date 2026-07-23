@@ -93,6 +93,9 @@ export const updateProject = (orgSlug: string, projectSlug: string, name: string
     body: JSON.stringify({ name }),
   });
 
+export const deleteProject = (orgSlug: string, projectSlug: string) =>
+  api<void>(`/api/0/projects/${orgSlug}/${projectSlug}`, { method: "DELETE" });
+
 export interface IssueListParams {
   status?: string;
   sort?: string;

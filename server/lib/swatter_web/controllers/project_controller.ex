@@ -68,6 +68,28 @@ defmodule SwatterWeb.ProjectController do
     end
   end
 
+  operation(:delete,
+    summary: "Удалить проект со всеми данными (issues, события, релизы, DSN)",
+    parameters: [
+      org_slug: [in: :path, type: :string, required: true],
+      project_slug: [in: :path, type: :string, required: true]
+    ],
+    responses: [
+      no_content: "Удалён",
+      not_found: {"Проект не найден", "application/json", ApiSchemas.Error}
+    ]
+  )
+
+  def delete(conn, %{"org_slug" => org_slug, "project_slug" => project_slug}) do
+    with org when not is_nil(org) <- authorized_org(conn, org_slug),
+         project when not is_nil(project) <- Projects.get_project_by_slug(org, project_slug) do
+      :ok = Projects.delete_project(project)
+      send_resp(conn, 204, "")
+    else
+      nil -> conn |> put_status(404) |> json(%{detail: "project not found"})
+    end
+  end
+
   operation(:create,
     summary: "Создать проект (сразу с DSN-ключом)",
     parameters: [
