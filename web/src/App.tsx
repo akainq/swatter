@@ -3,6 +3,7 @@ import { BrowserRouter, Link, Navigate, Route, Routes, useNavigate } from "react
 import { ApiError, fetchMe, fetchProjects, fetchSetupStatus, logout } from "./api/client";
 import type { CurrentUser } from "./api/client";
 import AlertSettingsPage from "./pages/AlertSettingsPage";
+import ApiTokensPage from "./pages/ApiTokensPage";
 import CreateProjectPage from "./pages/CreateProjectPage";
 import IssueDetailPage from "./pages/IssueDetailPage";
 import IssuesPage from "./pages/IssuesPage";
@@ -83,6 +84,9 @@ function Shell({ user, onSignedOut }: { user: CurrentUser; onSignedOut: () => Pr
               Projects
             </Link>
           )}
+          <Link to="/settings/tokens" className="muted">
+            API
+          </Link>
         </nav>
         <div className="header-right">
           <span className="muted">{user.email}</span>
@@ -103,6 +107,7 @@ function Shell({ user, onSignedOut }: { user: CurrentUser; onSignedOut: () => Pr
               )
             }
           />
+          <Route path="/settings/tokens" element={<ApiTokensPage />} />
           <Route path="/:orgSlug/projects" element={<ProjectsPage />} />
           <Route path="/:orgSlug/projects/new" element={<CreateProjectPage />} />
           <Route path="/:orgSlug/:projectSlug/releases" element={<ReleasesPage />} />

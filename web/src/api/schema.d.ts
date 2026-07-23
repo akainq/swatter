@@ -4,6 +4,41 @@
  */
 
 export interface paths {
+    "/api/0/api-tokens": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** API-токены текущего пользователя (ADR-0017, без секретов) */
+        get: operations["SwatterWeb.ApiTokenController.index"];
+        put?: never;
+        /** Создать API-токен (плейнтекст возвращается один раз) */
+        post: operations["SwatterWeb.ApiTokenController.create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/0/api-tokens/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Отозвать API-токен */
+        delete: operations["SwatterWeb.ApiTokenController.delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/0/auth/login": {
         parameters: {
             query?: never;
@@ -384,6 +419,74 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         /**
+         * TransactionStat
+         * @description Агрегат по транзакции за окно (ADR-0014)
+         */
+        TransactionStat: {
+            count: number;
+            /** Format: date-time */
+            lastSeen: string;
+            /** @description медиана длительности, мс */
+            p50: number;
+            /** @description 95-й перцентиль длительности, мс */
+            p95: number;
+            /** @description запросов в минуту за окно */
+            rpm: number;
+            transaction: string;
+        };
+        /** ApiTokenList */
+        ApiTokenList: components["schemas"]["ApiToken"][];
+        /** Artifact */
+        Artifact: {
+            debugId: string;
+            id: string;
+            name?: string | null;
+            /** @description размер распакованного контента */
+            size: number;
+            /** @enum {string} */
+            type: "source_map" | "minified_source";
+        };
+        /** RelatedErrorList */
+        RelatedErrorList: components["schemas"]["RelatedError"][];
+        /** Error */
+        Error: {
+            detail: string;
+        };
+        /** TraceSpan */
+        TraceSpan: {
+            description?: string;
+            durationMs: number;
+            /** Format: date-time */
+            endTs: string;
+            isSegment: boolean;
+            op: string;
+            parentSpanId: string;
+            projectId?: string;
+            projectSlug?: string | null;
+            spanId: string;
+            /** Format: date-time */
+            startTs: string;
+            status?: string;
+            transaction?: string;
+        };
+        /** ProjectCreateRequest */
+        ProjectCreateRequest: {
+            name: string;
+            platform?: string | null;
+            slug: string;
+        };
+        /** CurrentUser */
+        CurrentUser: {
+            email: string;
+            id: string;
+            memberships: {
+                organization: components["schemas"]["Organization"];
+                /** @enum {string} */
+                role: "owner" | "admin" | "member";
+            }[];
+            name?: string;
+        };
+        /**
          * AIAnalysis
          * @description AI-анализ issue (ADR-0016), запускается по запросу
          */
@@ -400,6 +503,12 @@ export interface components {
             suggestedFix?: string | null;
             summary?: string | null;
         };
+        /** Organization */
+        Organization: {
+            id: string;
+            name: string;
+            slug: string;
+        };
         /**
          * AlertSettings
          * @description Per-project настройки Telegram-алертов (ADR-0013)
@@ -415,39 +524,162 @@ export interface components {
             /** @description задан ли общий TELEGRAM_BOT_TOKEN на инстансе */
             telegramConfigured: boolean;
         };
-        /** AlertSettingsUpdateRequest */
-        AlertSettingsUpdateRequest: {
-            enabled?: boolean;
-            frequencyThreshold?: number | null;
-            frequencyWindowSeconds?: number;
-            onNewIssue?: boolean;
-            onRegression?: boolean;
-            telegramChatId?: string | null;
-        };
-        /** Artifact */
-        Artifact: {
-            debugId: string;
+        /** Project */
+        Project: {
+            /** @description DSN первого активного ключа */
+            dsn?: string | null;
+            /** @description События за последние 24 часа (в списке проектов) */
+            events24h?: number | null;
             id: string;
-            name?: string | null;
-            /** @description размер распакованного контента */
-            size: number;
-            /** @enum {string} */
-            type: "source_map" | "minified_source";
+            name: string;
+            platform?: string | null;
+            slug: string;
+            /** @description Счётчик unresolved issues (в списке проектов) */
+            unresolvedIssues?: number | null;
         };
-        /** CurrentUser */
-        CurrentUser: {
+        /** EventList */
+        EventList: components["schemas"]["Event"][];
+        /** ReleaseDetail */
+        ReleaseDetail: {
+            /** Format: date-time */
+            firstEventAt?: string | null;
+            id: string;
+            newIssues: components["schemas"]["Issue"][];
+            ordinal: number;
+            version: string;
+        };
+        /** SetupStatus */
+        SetupStatus: {
+            setupRequired: boolean;
+        };
+        /** ApiTokenCreateRequest */
+        ApiTokenCreateRequest: {
+            name: string;
+        };
+        /** TraceSummary */
+        TraceSummary: {
+            durationMs: number;
+            environment?: string;
+            release?: string;
+            /** Format: date-time */
+            startTs: string;
+            status?: string;
+            traceId: string;
+        };
+        /**
+         * Trace
+         * @description Спаны и ошибки трейса по всем проектам организации (ADR-0014)
+         */
+        Trace: {
+            errors: components["schemas"]["RelatedError"][];
+            spans: components["schemas"]["TraceSpan"][];
+            traceId: string;
+        };
+        /** IssueList */
+        IssueList: components["schemas"]["Issue"][];
+        /** ApiToken */
+        ApiToken: {
+            id: string;
+            /** Format: date-time */
+            insertedAt: string;
+            name: string;
+        };
+        /** LoginRequest */
+        LoginRequest: {
+            /** Format: email */
             email: string;
-            id: string;
-            memberships: {
-                organization: components["schemas"]["Organization"];
-                /** @enum {string} */
-                role: "owner" | "admin" | "member";
-            }[];
-            name?: string;
+            password: string;
         };
-        /** Error */
-        Error: {
-            detail: string;
+        /** TraceSummaryList */
+        TraceSummaryList: components["schemas"]["TraceSummary"][];
+        /** FilterValues */
+        FilterValues: {
+            environments: string[];
+            releases: string[];
+        };
+        /**
+         * ApiTokenCreated
+         * @description Плейнтекст `token` показывается только в этом ответе (ADR-0017)
+         */
+        ApiTokenCreated: {
+            id: string;
+            /** Format: date-time */
+            insertedAt: string;
+            name: string;
+            /** @description swt_... */
+            token: string;
+        };
+        /** Issue */
+        Issue: {
+            /** @description только в деталке; null, если анализ не запрашивался */
+            aiAnalysis?: components["schemas"]["AIAnalysis"] | null;
+            /** @description только в деталке: настроен ли AI на инстансе (ZAI_API_KEY) */
+            aiEnabled?: boolean | null;
+            /** @description times_seen */
+            count: number;
+            culprit: string;
+            /** Format: date-time */
+            firstSeen: string;
+            id: string;
+            /** Format: date-time */
+            lastSeen: string;
+            /** @enum {string} */
+            level: "fatal" | "error" | "warning" | "info" | "debug";
+            project?: {
+                id?: string;
+                slug?: string;
+            } | null;
+            /** @description вернулся в релизе новее закрытия */
+            regressed?: boolean;
+            /** @enum {string} */
+            status: "unresolved" | "resolved" | "ignored";
+            title: string;
+        };
+        /** SetupRequest */
+        SetupRequest: {
+            /** Format: email */
+            email: string;
+            name?: string;
+            /** @default Swatter */
+            orgName: string;
+            /** @default swatter */
+            orgSlug: string;
+            password: string;
+        };
+        /**
+         * RelatedError
+         * @description Ошибка того же трейса (кросс-сервисная связка, ADR-0014)
+         */
+        RelatedError: {
+            eventId: string;
+            issueId: string;
+            level: string;
+            projectId: string;
+            projectSlug?: string | null;
+            /** Format: date-time */
+            timestamp: string;
+            title: string;
+        };
+        /** IssueUpdateRequest */
+        IssueUpdateRequest: {
+            /** @enum {string} */
+            status: "unresolved" | "resolved" | "ignored";
+        };
+        /** TagEntry */
+        TagEntry: {
+            key: string;
+            value: string;
+        };
+        /** Release */
+        Release: {
+            /** Format: date-time */
+            firstEventAt?: string | null;
+            id: string;
+            /** @description новых issues в релизе */
+            newIssues?: number | null;
+            /** @description порядок в проекте (больше = новее) */
+            ordinal: number;
+            version: string;
         };
         /** Event */
         Event: {
@@ -479,191 +711,19 @@ export interface components {
                 ipAddress?: string;
             };
         };
-        /** EventList */
-        EventList: components["schemas"]["Event"][];
-        /** FilterValues */
-        FilterValues: {
-            environments: string[];
-            releases: string[];
-        };
-        /** Issue */
-        Issue: {
-            /** @description только в деталке; null, если анализ не запрашивался */
-            aiAnalysis?: components["schemas"]["AIAnalysis"] | null;
-            /** @description только в деталке: настроен ли AI на инстансе (ZAI_API_KEY) */
-            aiEnabled?: boolean | null;
-            /** @description times_seen */
-            count: number;
-            culprit: string;
-            /** Format: date-time */
-            firstSeen: string;
-            id: string;
-            /** Format: date-time */
-            lastSeen: string;
-            /** @enum {string} */
-            level: "fatal" | "error" | "warning" | "info" | "debug";
-            project?: {
-                id?: string;
-                slug?: string;
-            } | null;
-            /** @description вернулся в релизе новее закрытия */
-            regressed?: boolean;
-            /** @enum {string} */
-            status: "unresolved" | "resolved" | "ignored";
-            title: string;
-        };
-        /** IssueList */
-        IssueList: components["schemas"]["Issue"][];
-        /** IssueUpdateRequest */
-        IssueUpdateRequest: {
-            /** @enum {string} */
-            status: "unresolved" | "resolved" | "ignored";
-        };
-        /** LoginRequest */
-        LoginRequest: {
-            /** Format: email */
-            email: string;
-            password: string;
-        };
-        /** Organization */
-        Organization: {
-            id: string;
-            name: string;
-            slug: string;
-        };
-        /** Project */
-        Project: {
-            /** @description DSN первого активного ключа */
-            dsn?: string | null;
-            /** @description События за последние 24 часа (в списке проектов) */
-            events24h?: number | null;
-            id: string;
-            name: string;
-            platform?: string | null;
-            slug: string;
-            /** @description Счётчик unresolved issues (в списке проектов) */
-            unresolvedIssues?: number | null;
-        };
-        /** ProjectCreateRequest */
-        ProjectCreateRequest: {
-            name: string;
-            platform?: string | null;
-            slug: string;
-        };
         /** ProjectUpdateRequest */
         ProjectUpdateRequest: {
             name: string;
             platform?: string | null;
         };
-        /**
-         * RelatedError
-         * @description Ошибка того же трейса (кросс-сервисная связка, ADR-0014)
-         */
-        RelatedError: {
-            eventId: string;
-            issueId: string;
-            level: string;
-            projectId: string;
-            projectSlug?: string | null;
-            /** Format: date-time */
-            timestamp: string;
-            title: string;
-        };
-        /** RelatedErrorList */
-        RelatedErrorList: components["schemas"]["RelatedError"][];
-        /** Release */
-        Release: {
-            /** Format: date-time */
-            firstEventAt?: string | null;
-            id: string;
-            /** @description новых issues в релизе */
-            newIssues?: number | null;
-            /** @description порядок в проекте (больше = новее) */
-            ordinal: number;
-            version: string;
-        };
-        /** ReleaseDetail */
-        ReleaseDetail: {
-            /** Format: date-time */
-            firstEventAt?: string | null;
-            id: string;
-            newIssues: components["schemas"]["Issue"][];
-            ordinal: number;
-            version: string;
-        };
-        /** SetupRequest */
-        SetupRequest: {
-            /** Format: email */
-            email: string;
-            name?: string;
-            /** @default Swatter */
-            orgName: string;
-            /** @default swatter */
-            orgSlug: string;
-            password: string;
-        };
-        /** SetupStatus */
-        SetupStatus: {
-            setupRequired: boolean;
-        };
-        /** TagEntry */
-        TagEntry: {
-            key: string;
-            value: string;
-        };
-        /**
-         * Trace
-         * @description Спаны и ошибки трейса по всем проектам организации (ADR-0014)
-         */
-        Trace: {
-            errors: components["schemas"]["RelatedError"][];
-            spans: components["schemas"]["TraceSpan"][];
-            traceId: string;
-        };
-        /** TraceSpan */
-        TraceSpan: {
-            description?: string;
-            durationMs: number;
-            /** Format: date-time */
-            endTs: string;
-            isSegment: boolean;
-            op: string;
-            parentSpanId: string;
-            projectId?: string;
-            projectSlug?: string | null;
-            spanId: string;
-            /** Format: date-time */
-            startTs: string;
-            status?: string;
-            transaction?: string;
-        };
-        /** TraceSummary */
-        TraceSummary: {
-            durationMs: number;
-            environment?: string;
-            release?: string;
-            /** Format: date-time */
-            startTs: string;
-            status?: string;
-            traceId: string;
-        };
-        /** TraceSummaryList */
-        TraceSummaryList: components["schemas"]["TraceSummary"][];
-        /**
-         * TransactionStat
-         * @description Агрегат по транзакции за окно (ADR-0014)
-         */
-        TransactionStat: {
-            count: number;
-            /** Format: date-time */
-            lastSeen: string;
-            /** @description медиана длительности, мс */
-            p50: number;
-            /** @description 95-й перцентиль длительности, мс */
-            p95: number;
-            /** @description запросов в минуту за окно */
-            rpm: number;
-            transaction: string;
+        /** AlertSettingsUpdateRequest */
+        AlertSettingsUpdateRequest: {
+            enabled?: boolean;
+            frequencyThreshold?: number | null;
+            frequencyWindowSeconds?: number;
+            onNewIssue?: boolean;
+            onRegression?: boolean;
+            telegramChatId?: string | null;
         };
         /** TransactionStatList */
         TransactionStatList: components["schemas"]["TransactionStat"][];
@@ -676,6 +736,89 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    "SwatterWeb.ApiTokenController.index": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Токены */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiTokenList"];
+                };
+            };
+        };
+    };
+    "SwatterWeb.ApiTokenController.create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Имя токена */
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ApiTokenCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Создан */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiTokenCreated"];
+                };
+            };
+            /** @description Ошибка */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    "SwatterWeb.ApiTokenController.delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Отозван */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Не найден */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     "SwatterWeb.AuthController.login": {
         parameters: {
             query?: never;

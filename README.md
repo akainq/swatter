@@ -16,6 +16,19 @@ Official self-hosted Sentry is ~16 containers including Kafka and ZooKeeper. Swa
 - **AI issue analysis (optional)** — an on-demand summary of the root cause, severity and a suggested fix, produced by an OpenAI-compatible LLM endpoint (z.ai GLM by default). Runs only when a user clicks Analyze; disabled entirely unless an API key is configured.
 - **Tracing & performance** — transaction ingest into ClickHouse, p50/p95/throughput per transaction, a cross-service trace waterfall, and errors linked to traces by `trace_id` in both directions.
 
+## Debugging with AI agents (MCP)
+
+Swatter ships a built-in MCP server at `/mcp`: paste an issue link into Claude Code (or any MCP client) and the agent pulls the symbolicated stack trace, tags, breadcrumbs, the stored AI analysis and the cross-service trace — then fixes the code in your local repo and marks the issue resolved.
+
+1. Create an API token in the UI (header → **API**).
+2. Connect Claude Code:
+
+```sh
+claude mcp add --transport http swatter https://<host>/mcp --header "Authorization: Bearer swt_..."
+```
+
+Tools: `get_issue` (accepts an issue URL or id), `list_issues`, `get_trace`, `resolve_issue`. A token sees the same organizations as the user who created it.
+
 ## Stack
 
 Elixir (Phoenix, Broadway, Oban) · PostgreSQL · ClickHouse · Redis · React (Vite + TypeScript)

@@ -2,6 +2,302 @@
   "components": {
     "responses": {},
     "schemas": {
+      "TransactionStat": {
+        "description": "Агрегат по транзакции за окно (ADR-0014)",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "lastSeen": {
+            "format": "date-time",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "p50": {
+            "description": "медиана длительности, мс",
+            "type": "number",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "p95": {
+            "description": "95-й перцентиль длительности, мс",
+            "type": "number",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "rpm": {
+            "description": "запросов в минуту за окно",
+            "type": "number",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "transaction": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "transaction",
+          "count",
+          "rpm",
+          "p50",
+          "p95",
+          "lastSeen"
+        ],
+        "title": "TransactionStat",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.TransactionStat",
+        "x-validate": null
+      },
+      "ApiTokenList": {
+        "items": {
+          "$ref": "#/components/schemas/ApiToken"
+        },
+        "title": "ApiTokenList",
+        "type": "array",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.ApiTokenList",
+        "x-validate": null
+      },
+      "Artifact": {
+        "properties": {
+          "debugId": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "id": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "name": {
+            "nullable": true,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "size": {
+            "description": "размер распакованного контента",
+            "type": "integer",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "type": {
+            "enum": [
+              "source_map",
+              "minified_source"
+            ],
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "id",
+          "debugId",
+          "type",
+          "size"
+        ],
+        "title": "Artifact",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.Artifact",
+        "x-validate": null
+      },
+      "RelatedErrorList": {
+        "items": {
+          "$ref": "#/components/schemas/RelatedError"
+        },
+        "title": "RelatedErrorList",
+        "type": "array",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.RelatedErrorList",
+        "x-validate": null
+      },
+      "Error": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "detail"
+        ],
+        "title": "Error",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.Error",
+        "x-validate": null
+      },
+      "TraceSpan": {
+        "properties": {
+          "description": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "durationMs": {
+            "type": "number",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "endTs": {
+            "format": "date-time",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "isSegment": {
+            "type": "boolean",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "op": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "parentSpanId": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "projectId": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "projectSlug": {
+            "nullable": true,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "spanId": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "startTs": {
+            "format": "date-time",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "status": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "transaction": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "spanId",
+          "parentSpanId",
+          "isSegment",
+          "op",
+          "startTs",
+          "endTs",
+          "durationMs"
+        ],
+        "title": "TraceSpan",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.TraceSpan",
+        "x-validate": null
+      },
+      "ProjectCreateRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "platform": {
+            "nullable": true,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "slug": {
+            "pattern": "^[a-z0-9][a-z0-9-]*$",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "name",
+          "slug"
+        ],
+        "title": "ProjectCreateRequest",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.ProjectCreateRequest",
+        "x-validate": null
+      },
+      "CurrentUser": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "id": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "memberships": {
+            "items": {
+              "properties": {
+                "organization": {
+                  "$ref": "#/components/schemas/Organization"
+                },
+                "role": {
+                  "enum": [
+                    "owner",
+                    "admin",
+                    "member"
+                  ],
+                  "type": "string",
+                  "x-struct": null,
+                  "x-validate": null
+                }
+              },
+              "required": [
+                "role",
+                "organization"
+              ],
+              "type": "object",
+              "x-struct": null,
+              "x-validate": null
+            },
+            "type": "array",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "name": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "memberships"
+        ],
+        "title": "CurrentUser",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.CurrentUser",
+        "x-validate": null
+      },
       "AIAnalysis": {
         "description": "AI-анализ issue (ADR-0016), запускается по запросу",
         "properties": {
@@ -73,6 +369,34 @@
         "x-struct": "Elixir.SwatterWeb.ApiSchemas.AIAnalysis",
         "x-validate": null
       },
+      "Organization": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "name": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "slug": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "name"
+        ],
+        "title": "Organization",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.Organization",
+        "x-validate": null
+      },
       "AlertSettings": {
         "description": "Per-project настройки Telegram-алертов (ADR-0013)",
         "properties": {
@@ -128,50 +452,19 @@
         "x-struct": "Elixir.SwatterWeb.ApiSchemas.AlertSettings",
         "x-validate": null
       },
-      "AlertSettingsUpdateRequest": {
+      "Project": {
         "properties": {
-          "enabled": {
-            "type": "boolean",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "frequencyThreshold": {
-            "nullable": true,
-            "type": "integer",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "frequencyWindowSeconds": {
-            "type": "integer",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "onNewIssue": {
-            "type": "boolean",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "onRegression": {
-            "type": "boolean",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "telegramChatId": {
+          "dsn": {
+            "description": "DSN первого активного ключа",
             "nullable": true,
             "type": "string",
             "x-struct": null,
             "x-validate": null
-          }
-        },
-        "title": "AlertSettingsUpdateRequest",
-        "type": "object",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.AlertSettingsUpdateRequest",
-        "x-validate": null
-      },
-      "Artifact": {
-        "properties": {
-          "debugId": {
-            "type": "string",
+          },
+          "events24h": {
+            "description": "События за последние 24 часа (в списке проектов)",
+            "nullable": true,
+            "type": "integer",
             "x-struct": null,
             "x-validate": null
           },
@@ -181,41 +474,53 @@
             "x-validate": null
           },
           "name": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "platform": {
             "nullable": true,
             "type": "string",
             "x-struct": null,
             "x-validate": null
           },
-          "size": {
-            "description": "размер распакованного контента",
-            "type": "integer",
+          "slug": {
+            "type": "string",
             "x-struct": null,
             "x-validate": null
           },
-          "type": {
-            "enum": [
-              "source_map",
-              "minified_source"
-            ],
-            "type": "string",
+          "unresolvedIssues": {
+            "description": "Счётчик unresolved issues (в списке проектов)",
+            "nullable": true,
+            "type": "integer",
             "x-struct": null,
             "x-validate": null
           }
         },
         "required": [
           "id",
-          "debugId",
-          "type",
-          "size"
+          "slug",
+          "name"
         ],
-        "title": "Artifact",
+        "title": "Project",
         "type": "object",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.Artifact",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.Project",
         "x-validate": null
       },
-      "CurrentUser": {
+      "EventList": {
+        "items": {
+          "$ref": "#/components/schemas/Event"
+        },
+        "title": "EventList",
+        "type": "array",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.EventList",
+        "x-validate": null
+      },
+      "ReleaseDetail": {
         "properties": {
-          "email": {
+          "firstEventAt": {
+            "format": "date-time",
+            "nullable": true,
             "type": "string",
             "x-struct": null,
             "x-validate": null
@@ -225,28 +530,222 @@
             "x-struct": null,
             "x-validate": null
           },
-          "memberships": {
+          "newIssues": {
             "items": {
-              "properties": {
-                "organization": {
-                  "$ref": "#/components/schemas/Organization"
-                },
-                "role": {
-                  "enum": [
-                    "owner",
-                    "admin",
-                    "member"
-                  ],
-                  "type": "string",
-                  "x-struct": null,
-                  "x-validate": null
-                }
-              },
-              "required": [
-                "role",
-                "organization"
-              ],
-              "type": "object",
+              "$ref": "#/components/schemas/Issue"
+            },
+            "type": "array",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "ordinal": {
+            "type": "integer",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "version": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "ordinal",
+          "newIssues"
+        ],
+        "title": "ReleaseDetail",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.ReleaseDetail",
+        "x-validate": null
+      },
+      "SetupStatus": {
+        "properties": {
+          "setupRequired": {
+            "type": "boolean",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "setupRequired"
+        ],
+        "title": "SetupStatus",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.SetupStatus",
+        "x-validate": null
+      },
+      "ApiTokenCreateRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "ApiTokenCreateRequest",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.ApiTokenCreateRequest",
+        "x-validate": null
+      },
+      "TraceSummary": {
+        "properties": {
+          "durationMs": {
+            "type": "number",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "environment": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "release": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "startTs": {
+            "format": "date-time",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "status": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "traceId": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "traceId",
+          "startTs",
+          "durationMs"
+        ],
+        "title": "TraceSummary",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.TraceSummary",
+        "x-validate": null
+      },
+      "Trace": {
+        "description": "Спаны и ошибки трейса по всем проектам организации (ADR-0014)",
+        "properties": {
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/RelatedError"
+            },
+            "type": "array",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "spans": {
+            "items": {
+              "$ref": "#/components/schemas/TraceSpan"
+            },
+            "type": "array",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "traceId": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "traceId",
+          "spans",
+          "errors"
+        ],
+        "title": "Trace",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.Trace",
+        "x-validate": null
+      },
+      "IssueList": {
+        "items": {
+          "$ref": "#/components/schemas/Issue"
+        },
+        "title": "IssueList",
+        "type": "array",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.IssueList",
+        "x-validate": null
+      },
+      "ApiToken": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "insertedAt": {
+            "format": "date-time",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "name": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "insertedAt"
+        ],
+        "title": "ApiToken",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.ApiToken",
+        "x-validate": null
+      },
+      "LoginRequest": {
+        "properties": {
+          "email": {
+            "format": "email",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "password": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "LoginRequest",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.LoginRequest",
+        "x-validate": null
+      },
+      "TraceSummaryList": {
+        "items": {
+          "$ref": "#/components/schemas/TraceSummary"
+        },
+        "title": "TraceSummaryList",
+        "type": "array",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.TraceSummaryList",
+        "x-validate": null
+      },
+      "FilterValues": {
+        "properties": {
+          "environments": {
+            "items": {
+              "type": "string",
               "x-struct": null,
               "x-validate": null
             },
@@ -254,7 +753,47 @@
             "x-struct": null,
             "x-validate": null
           },
+          "releases": {
+            "items": {
+              "type": "string",
+              "x-struct": null,
+              "x-validate": null
+            },
+            "type": "array",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "environments",
+          "releases"
+        ],
+        "title": "FilterValues",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.FilterValues",
+        "x-validate": null
+      },
+      "ApiTokenCreated": {
+        "description": "Плейнтекст `token` показывается только в этом ответе (ADR-0017)",
+        "properties": {
+          "id": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "insertedAt": {
+            "format": "date-time",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
           "name": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "token": {
+            "description": "swt_...",
             "type": "string",
             "x-struct": null,
             "x-validate": null
@@ -262,28 +801,309 @@
         },
         "required": [
           "id",
-          "email",
-          "memberships"
+          "name",
+          "insertedAt",
+          "token"
         ],
-        "title": "CurrentUser",
+        "title": "ApiTokenCreated",
         "type": "object",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.CurrentUser",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.ApiTokenCreated",
         "x-validate": null
       },
-      "Error": {
+      "Issue": {
         "properties": {
-          "detail": {
+          "aiAnalysis": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AIAnalysis"
+              }
+            ],
+            "description": "только в деталке; null, если анализ не запрашивался",
+            "nullable": true,
+            "x-struct": null,
+            "x-validate": null
+          },
+          "aiEnabled": {
+            "description": "только в деталке: настроен ли AI на инстансе (ZAI_API_KEY)",
+            "nullable": true,
+            "type": "boolean",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "count": {
+            "description": "times_seen",
+            "type": "integer",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "culprit": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "firstSeen": {
+            "format": "date-time",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "id": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "lastSeen": {
+            "format": "date-time",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "level": {
+            "enum": [
+              "fatal",
+              "error",
+              "warning",
+              "info",
+              "debug"
+            ],
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "project": {
+            "nullable": true,
+            "properties": {
+              "id": {
+                "type": "string",
+                "x-struct": null,
+                "x-validate": null
+              },
+              "slug": {
+                "type": "string",
+                "x-struct": null,
+                "x-validate": null
+              }
+            },
+            "type": "object",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "regressed": {
+            "description": "вернулся в релизе новее закрытия",
+            "type": "boolean",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "status": {
+            "enum": [
+              "unresolved",
+              "resolved",
+              "ignored"
+            ],
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "title": {
             "type": "string",
             "x-struct": null,
             "x-validate": null
           }
         },
         "required": [
-          "detail"
+          "id",
+          "title",
+          "culprit",
+          "level",
+          "status",
+          "count",
+          "firstSeen",
+          "lastSeen"
         ],
-        "title": "Error",
+        "title": "Issue",
         "type": "object",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.Error",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.Issue",
+        "x-validate": null
+      },
+      "SetupRequest": {
+        "properties": {
+          "email": {
+            "format": "email",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "name": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "orgName": {
+            "default": "Swatter",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "orgSlug": {
+            "default": "swatter",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "password": {
+            "minLength": 8,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "SetupRequest",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.SetupRequest",
+        "x-validate": null
+      },
+      "RelatedError": {
+        "description": "Ошибка того же трейса (кросс-сервисная связка, ADR-0014)",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "issueId": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "level": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "projectId": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "projectSlug": {
+            "nullable": true,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "title": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "eventId",
+          "issueId",
+          "projectId",
+          "title",
+          "level",
+          "timestamp"
+        ],
+        "title": "RelatedError",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.RelatedError",
+        "x-validate": null
+      },
+      "IssueUpdateRequest": {
+        "properties": {
+          "status": {
+            "enum": [
+              "unresolved",
+              "resolved",
+              "ignored"
+            ],
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "IssueUpdateRequest",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.IssueUpdateRequest",
+        "x-validate": null
+      },
+      "TagEntry": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "value": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "title": "TagEntry",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.TagEntry",
+        "x-validate": null
+      },
+      "Release": {
+        "properties": {
+          "firstEventAt": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "id": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "newIssues": {
+            "description": "новых issues в релизе",
+            "nullable": true,
+            "type": "integer",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "ordinal": {
+            "description": "порядок в проекте (больше = новее)",
+            "type": "integer",
+            "x-struct": null,
+            "x-validate": null
+          },
+          "version": {
+            "type": "string",
+            "x-struct": null,
+            "x-validate": null
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "ordinal"
+        ],
+        "title": "Release",
+        "type": "object",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.Release",
         "x-validate": null
       },
       "Event": {
@@ -411,327 +1231,6 @@
         "x-struct": "Elixir.SwatterWeb.ApiSchemas.Event",
         "x-validate": null
       },
-      "EventList": {
-        "items": {
-          "$ref": "#/components/schemas/Event"
-        },
-        "title": "EventList",
-        "type": "array",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.EventList",
-        "x-validate": null
-      },
-      "FilterValues": {
-        "properties": {
-          "environments": {
-            "items": {
-              "type": "string",
-              "x-struct": null,
-              "x-validate": null
-            },
-            "type": "array",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "releases": {
-            "items": {
-              "type": "string",
-              "x-struct": null,
-              "x-validate": null
-            },
-            "type": "array",
-            "x-struct": null,
-            "x-validate": null
-          }
-        },
-        "required": [
-          "environments",
-          "releases"
-        ],
-        "title": "FilterValues",
-        "type": "object",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.FilterValues",
-        "x-validate": null
-      },
-      "Issue": {
-        "properties": {
-          "aiAnalysis": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AIAnalysis"
-              }
-            ],
-            "description": "только в деталке; null, если анализ не запрашивался",
-            "nullable": true,
-            "x-struct": null,
-            "x-validate": null
-          },
-          "aiEnabled": {
-            "description": "только в деталке: настроен ли AI на инстансе (ZAI_API_KEY)",
-            "nullable": true,
-            "type": "boolean",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "count": {
-            "description": "times_seen",
-            "type": "integer",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "culprit": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "firstSeen": {
-            "format": "date-time",
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "id": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "lastSeen": {
-            "format": "date-time",
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "level": {
-            "enum": [
-              "fatal",
-              "error",
-              "warning",
-              "info",
-              "debug"
-            ],
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "project": {
-            "nullable": true,
-            "properties": {
-              "id": {
-                "type": "string",
-                "x-struct": null,
-                "x-validate": null
-              },
-              "slug": {
-                "type": "string",
-                "x-struct": null,
-                "x-validate": null
-              }
-            },
-            "type": "object",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "regressed": {
-            "description": "вернулся в релизе новее закрытия",
-            "type": "boolean",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "status": {
-            "enum": [
-              "unresolved",
-              "resolved",
-              "ignored"
-            ],
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "title": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          }
-        },
-        "required": [
-          "id",
-          "title",
-          "culprit",
-          "level",
-          "status",
-          "count",
-          "firstSeen",
-          "lastSeen"
-        ],
-        "title": "Issue",
-        "type": "object",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.Issue",
-        "x-validate": null
-      },
-      "IssueList": {
-        "items": {
-          "$ref": "#/components/schemas/Issue"
-        },
-        "title": "IssueList",
-        "type": "array",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.IssueList",
-        "x-validate": null
-      },
-      "IssueUpdateRequest": {
-        "properties": {
-          "status": {
-            "enum": [
-              "unresolved",
-              "resolved",
-              "ignored"
-            ],
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          }
-        },
-        "required": [
-          "status"
-        ],
-        "title": "IssueUpdateRequest",
-        "type": "object",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.IssueUpdateRequest",
-        "x-validate": null
-      },
-      "LoginRequest": {
-        "properties": {
-          "email": {
-            "format": "email",
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "password": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          }
-        },
-        "required": [
-          "email",
-          "password"
-        ],
-        "title": "LoginRequest",
-        "type": "object",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.LoginRequest",
-        "x-validate": null
-      },
-      "Organization": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "name": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "slug": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          }
-        },
-        "required": [
-          "id",
-          "slug",
-          "name"
-        ],
-        "title": "Organization",
-        "type": "object",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.Organization",
-        "x-validate": null
-      },
-      "Project": {
-        "properties": {
-          "dsn": {
-            "description": "DSN первого активного ключа",
-            "nullable": true,
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "events24h": {
-            "description": "События за последние 24 часа (в списке проектов)",
-            "nullable": true,
-            "type": "integer",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "id": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "name": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "platform": {
-            "nullable": true,
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "slug": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "unresolvedIssues": {
-            "description": "Счётчик unresolved issues (в списке проектов)",
-            "nullable": true,
-            "type": "integer",
-            "x-struct": null,
-            "x-validate": null
-          }
-        },
-        "required": [
-          "id",
-          "slug",
-          "name"
-        ],
-        "title": "Project",
-        "type": "object",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.Project",
-        "x-validate": null
-      },
-      "ProjectCreateRequest": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "platform": {
-            "nullable": true,
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "slug": {
-            "pattern": "^[a-z0-9][a-z0-9-]*$",
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          }
-        },
-        "required": [
-          "name",
-          "slug"
-        ],
-        "title": "ProjectCreateRequest",
-        "type": "object",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.ProjectCreateRequest",
-        "x-validate": null
-      },
       "ProjectUpdateRequest": {
         "properties": {
           "name": {
@@ -754,452 +1253,44 @@
         "x-struct": "Elixir.SwatterWeb.ApiSchemas.ProjectUpdateRequest",
         "x-validate": null
       },
-      "RelatedError": {
-        "description": "Ошибка того же трейса (кросс-сервисная связка, ADR-0014)",
+      "AlertSettingsUpdateRequest": {
         "properties": {
-          "eventId": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "issueId": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "level": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "projectId": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "projectSlug": {
-            "nullable": true,
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "timestamp": {
-            "format": "date-time",
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "title": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          }
-        },
-        "required": [
-          "eventId",
-          "issueId",
-          "projectId",
-          "title",
-          "level",
-          "timestamp"
-        ],
-        "title": "RelatedError",
-        "type": "object",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.RelatedError",
-        "x-validate": null
-      },
-      "RelatedErrorList": {
-        "items": {
-          "$ref": "#/components/schemas/RelatedError"
-        },
-        "title": "RelatedErrorList",
-        "type": "array",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.RelatedErrorList",
-        "x-validate": null
-      },
-      "Release": {
-        "properties": {
-          "firstEventAt": {
-            "format": "date-time",
-            "nullable": true,
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "id": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "newIssues": {
-            "description": "новых issues в релизе",
-            "nullable": true,
-            "type": "integer",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "ordinal": {
-            "description": "порядок в проекте (больше = новее)",
-            "type": "integer",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "version": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          }
-        },
-        "required": [
-          "id",
-          "version",
-          "ordinal"
-        ],
-        "title": "Release",
-        "type": "object",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.Release",
-        "x-validate": null
-      },
-      "ReleaseDetail": {
-        "properties": {
-          "firstEventAt": {
-            "format": "date-time",
-            "nullable": true,
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "id": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "newIssues": {
-            "items": {
-              "$ref": "#/components/schemas/Issue"
-            },
-            "type": "array",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "ordinal": {
-            "type": "integer",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "version": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          }
-        },
-        "required": [
-          "id",
-          "version",
-          "ordinal",
-          "newIssues"
-        ],
-        "title": "ReleaseDetail",
-        "type": "object",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.ReleaseDetail",
-        "x-validate": null
-      },
-      "SetupRequest": {
-        "properties": {
-          "email": {
-            "format": "email",
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "name": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "orgName": {
-            "default": "Swatter",
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "orgSlug": {
-            "default": "swatter",
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "password": {
-            "minLength": 8,
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          }
-        },
-        "required": [
-          "email",
-          "password"
-        ],
-        "title": "SetupRequest",
-        "type": "object",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.SetupRequest",
-        "x-validate": null
-      },
-      "SetupStatus": {
-        "properties": {
-          "setupRequired": {
-            "type": "boolean",
-            "x-struct": null,
-            "x-validate": null
-          }
-        },
-        "required": [
-          "setupRequired"
-        ],
-        "title": "SetupStatus",
-        "type": "object",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.SetupStatus",
-        "x-validate": null
-      },
-      "TagEntry": {
-        "properties": {
-          "key": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "value": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          }
-        },
-        "required": [
-          "key",
-          "value"
-        ],
-        "title": "TagEntry",
-        "type": "object",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.TagEntry",
-        "x-validate": null
-      },
-      "Trace": {
-        "description": "Спаны и ошибки трейса по всем проектам организации (ADR-0014)",
-        "properties": {
-          "errors": {
-            "items": {
-              "$ref": "#/components/schemas/RelatedError"
-            },
-            "type": "array",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "spans": {
-            "items": {
-              "$ref": "#/components/schemas/TraceSpan"
-            },
-            "type": "array",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "traceId": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          }
-        },
-        "required": [
-          "traceId",
-          "spans",
-          "errors"
-        ],
-        "title": "Trace",
-        "type": "object",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.Trace",
-        "x-validate": null
-      },
-      "TraceSpan": {
-        "properties": {
-          "description": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "durationMs": {
-            "type": "number",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "endTs": {
-            "format": "date-time",
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "isSegment": {
+          "enabled": {
             "type": "boolean",
             "x-struct": null,
             "x-validate": null
           },
-          "op": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "parentSpanId": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "projectId": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "projectSlug": {
+          "frequencyThreshold": {
             "nullable": true,
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "spanId": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "startTs": {
-            "format": "date-time",
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "status": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "transaction": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          }
-        },
-        "required": [
-          "spanId",
-          "parentSpanId",
-          "isSegment",
-          "op",
-          "startTs",
-          "endTs",
-          "durationMs"
-        ],
-        "title": "TraceSpan",
-        "type": "object",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.TraceSpan",
-        "x-validate": null
-      },
-      "TraceSummary": {
-        "properties": {
-          "durationMs": {
-            "type": "number",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "environment": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "release": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "startTs": {
-            "format": "date-time",
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "status": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "traceId": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          }
-        },
-        "required": [
-          "traceId",
-          "startTs",
-          "durationMs"
-        ],
-        "title": "TraceSummary",
-        "type": "object",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.TraceSummary",
-        "x-validate": null
-      },
-      "TraceSummaryList": {
-        "items": {
-          "$ref": "#/components/schemas/TraceSummary"
-        },
-        "title": "TraceSummaryList",
-        "type": "array",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.TraceSummaryList",
-        "x-validate": null
-      },
-      "TransactionStat": {
-        "description": "Агрегат по транзакции за окно (ADR-0014)",
-        "properties": {
-          "count": {
             "type": "integer",
             "x-struct": null,
             "x-validate": null
           },
-          "lastSeen": {
-            "format": "date-time",
-            "type": "string",
+          "frequencyWindowSeconds": {
+            "type": "integer",
             "x-struct": null,
             "x-validate": null
           },
-          "p50": {
-            "description": "медиана длительности, мс",
-            "type": "number",
+          "onNewIssue": {
+            "type": "boolean",
             "x-struct": null,
             "x-validate": null
           },
-          "p95": {
-            "description": "95-й перцентиль длительности, мс",
-            "type": "number",
+          "onRegression": {
+            "type": "boolean",
             "x-struct": null,
             "x-validate": null
           },
-          "rpm": {
-            "description": "запросов в минуту за окно",
-            "type": "number",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "transaction": {
+          "telegramChatId": {
+            "nullable": true,
             "type": "string",
             "x-struct": null,
             "x-validate": null
           }
         },
-        "required": [
-          "transaction",
-          "count",
-          "rpm",
-          "p50",
-          "p95",
-          "lastSeen"
-        ],
-        "title": "TransactionStat",
+        "title": "AlertSettingsUpdateRequest",
         "type": "object",
-        "x-struct": "Elixir.SwatterWeb.ApiSchemas.TransactionStat",
+        "x-struct": "Elixir.SwatterWeb.ApiSchemas.AlertSettingsUpdateRequest",
         "x-validate": null
       },
       "TransactionStatList": {
@@ -1220,6 +1311,109 @@
   },
   "openapi": "3.0.0",
   "paths": {
+    "/api/0/api-tokens": {
+      "get": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.ApiTokenController.index",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiTokenList"
+                }
+              }
+            },
+            "description": "Токены"
+          }
+        },
+        "summary": "API-токены текущего пользователя (ADR-0017, без секретов)",
+        "tags": [
+          "api-tokens"
+        ]
+      },
+      "post": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.ApiTokenController.create",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiTokenCreateRequest"
+              }
+            }
+          },
+          "description": "Имя токена",
+          "required": false
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiTokenCreated"
+                }
+              }
+            },
+            "description": "Создан"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Ошибка"
+          }
+        },
+        "summary": "Создать API-токен (плейнтекст возвращается один раз)",
+        "tags": [
+          "api-tokens"
+        ]
+      }
+    },
+    "/api/0/api-tokens/{id}": {
+      "delete": {
+        "callbacks": {},
+        "operationId": "SwatterWeb.ApiTokenController.delete",
+        "parameters": [
+          {
+            "description": "",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "x-struct": null,
+              "x-validate": null
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Отозван"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Не найден"
+          }
+        },
+        "summary": "Отозвать API-токен",
+        "tags": [
+          "api-tokens"
+        ]
+      }
+    },
     "/api/0/auth/login": {
       "post": {
         "callbacks": {},

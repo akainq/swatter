@@ -448,6 +448,55 @@ defmodule SwatterWeb.ApiSchemas do
     })
   end
 
+  defmodule ApiToken do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "ApiToken",
+      type: :object,
+      properties: %{
+        id: %Schema{type: :string},
+        name: %Schema{type: :string},
+        insertedAt: %Schema{type: :string, format: :"date-time"}
+      },
+      required: [:id, :name, :insertedAt]
+    })
+  end
+
+  defmodule ApiTokenList do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "ApiTokenList",
+      type: :array,
+      items: SwatterWeb.ApiSchemas.ApiToken
+    })
+  end
+
+  defmodule ApiTokenCreateRequest do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "ApiTokenCreateRequest",
+      type: :object,
+      properties: %{name: %Schema{type: :string}},
+      required: [:name]
+    })
+  end
+
+  defmodule ApiTokenCreated do
+    @moduledoc false
+    OpenApiSpex.schema(%{
+      title: "ApiTokenCreated",
+      description: "Плейнтекст `token` показывается только в этом ответе (ADR-0017)",
+      type: :object,
+      properties: %{
+        id: %Schema{type: :string},
+        name: %Schema{type: :string},
+        insertedAt: %Schema{type: :string, format: :"date-time"},
+        token: %Schema{type: :string, description: "swt_..."}
+      },
+      required: [:id, :name, :insertedAt, :token]
+    })
+  end
+
   defmodule SetupStatus do
     @moduledoc false
     OpenApiSpex.schema(%{

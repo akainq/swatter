@@ -17,6 +17,8 @@ export type TraceSummary = components["schemas"]["TraceSummary"];
 export type Trace = components["schemas"]["Trace"];
 export type TraceSpan = components["schemas"]["TraceSpan"];
 export type RelatedError = components["schemas"]["RelatedError"];
+export type ApiToken = components["schemas"]["ApiToken"];
+export type ApiTokenCreated = components["schemas"]["ApiTokenCreated"];
 export type AlertSettings = components["schemas"]["AlertSettings"];
 export type AlertSettingsUpdate = components["schemas"]["AlertSettingsUpdateRequest"];
 
@@ -184,6 +186,19 @@ export const updateAlertSettings = (
     method: "PUT",
     body: JSON.stringify(body),
   });
+
+// --- API-токены (ADR-0017): для MCP и автоматизации ---
+
+export const fetchApiTokens = () => api<ApiToken[]>("/api/0/api-tokens");
+
+export const createApiToken = (name: string) =>
+  api<ApiTokenCreated>("/api/0/api-tokens", {
+    method: "POST",
+    body: JSON.stringify({ name }),
+  });
+
+export const deleteApiToken = (id: string) =>
+  api<void>(`/api/0/api-tokens/${id}`, { method: "DELETE" });
 
 // --- auth (ADR-0007) ---
 

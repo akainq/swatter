@@ -26,6 +26,7 @@
 | [0013](0013-alerting-engine.md) | Движок алертов: правила (new/regression/частота), cooldown в Redis, Telegram-доставка через Oban | Accepted |
 | [0014](0014-tracing-data-model.md) | Трейсинг: одна таблица spans в CH (is_segment, TTL 30 дней, bloom по trace_id), агрегаты на лету, error↔trace по trace_id | Accepted |
 | [0016](0016-ai-issue-analysis.md) | AI-анализ issues на z.ai GLM (суть/причина/severity/фикс), фон через Oban, опционально | Accepted |
+| [0017](0017-mcp-server.md) | MCP-сервер `/mcp` для AI-агентов: свой JSON-RPC-обработчик, API-токены `swt_*`, тулы get_issue/list_issues/get_trace/resolve_issue | Accepted |
 
 ## Роадмап решений (очередь на проработку)
 

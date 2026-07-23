@@ -107,6 +107,42 @@ defmodule Swatter.Accounts do
 
   def delete_session_token(_), do: :ok
 
+  ## API-токены (ADR-0017)
+
+  @doc "Создаёт API-токен; плейнтекст `swt_...` возвращается один раз."
+  def create_api_token(%User{} = user, name) when is_binary(name) and name != "" do
+    {plaintext, token} = UserToken.build_api_token(user, name)
+    {:ok, record} = Repo.insert(token)
+    {:ok, plaintext, record}
+  end
+
+  def create_api_token(%User{}, _name), do: {:error, :invalid_name}
+
+  def list_api_tokens(%User{id: user_id}) do
+    Repo.all(
+      from t in UserToken,
+        where: t.user_id == ^user_id and t.context == "api",
+        order_by: [desc: t.id]
+    )
+  end
+
+  @doc "Ревокация своего токена; чужой/несуществующий — {:error, :not_found}."
+  def delete_api_token(%User{id: user_id}, token_id) do
+    case Repo.get_by(UserToken, id: token_id, user_id: user_id, context: "api") do
+      nil -> {:error, :not_found}
+      token -> Repo.delete(token)
+    end
+  end
+
+  def get_user_by_api_token(raw) when is_binary(raw) do
+    case UserToken.verify_api_token_query(raw) do
+      {:ok, query} -> Repo.one(query)
+      :error -> nil
+    end
+  end
+
+  def get_user_by_api_token(_), do: nil
+
   ## Membership
 
   def add_member(%User{id: user_id}, %Organization{id: org_id}, role \\ "member") do

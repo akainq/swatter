@@ -41,6 +41,24 @@ defmodule SwatterWeb.Router do
     plug SwatterWeb.Plugs.IngestCORS
   end
 
+  # MCP-сервер для AI-агентов (ADR-0017): JSON-RPC поверх POST, без сессий —
+  # авторизация Bearer swt_-токеном внутри контроллера
+  pipeline :mcp do
+    plug :accepts, ["json"]
+
+    plug Plug.Parsers,
+      parsers: [:json],
+      pass: ["*/*"],
+      json_decoder: Phoenix.json_library()
+  end
+
+  scope "/mcp" do
+    pipe_through :mcp
+
+    post "/", SwatterWeb.MCPController, :handle
+    get "/", SwatterWeb.MCPController, :method_not_allowed
+  end
+
   scope "/api", SwatterWeb do
     pipe_through :ingest
 
@@ -68,6 +86,9 @@ defmodule SwatterWeb.Router do
   scope "/api/0", SwatterWeb do
     pipe_through [:api, :authenticated]
 
+    get "/api-tokens", ApiTokenController, :index
+    post "/api-tokens", ApiTokenController, :create
+    delete "/api-tokens/:id", ApiTokenController, :delete
     get "/organizations", OrganizationController, :index
     get "/organizations/:org_slug/projects", ProjectController, :index
     post "/organizations/:org_slug/projects", ProjectController, :create
