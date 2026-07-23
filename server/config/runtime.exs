@@ -81,12 +81,24 @@ if config_env() == :prod do
   # want to use a different value for prod and you most likely don't want
   # to check this value into version control, so we use an environment
   # variable instead.
+  # Fail fast at boot: the cookie session store requires >= 64 bytes and only
+  # checks that lazily, when a session is first written — i.e. a 500 on login.
   secret_key_base =
-    System.get_env("SECRET_KEY_BASE") ||
-      raise """
-      environment variable SECRET_KEY_BASE is missing.
-      You can generate one by calling: mix phx.gen.secret
-      """
+    case System.get_env("SECRET_KEY_BASE") do
+      value when is_binary(value) and byte_size(value) >= 64 ->
+        value
+
+      _ ->
+        raise """
+        environment variable SECRET_KEY_BASE is missing or shorter than 64 bytes
+        (session cookies require at least 64). Generate a proper value with:
+
+            openssl rand -base64 48
+
+        and set it in the deployment environment (for Coolify: the resource's
+        Environment Variables).
+        """
+    end
 
   host = System.get_env("PHX_HOST") || "example.com"
 

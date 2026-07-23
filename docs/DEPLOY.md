@@ -24,6 +24,12 @@
 - Публикация порта `4000` в compose нужна только для ручного запуска;
   в Coolify маршрутизацию делает его прокси (переопределите
   `SWATTER_HTTP_PORT`, если порт конфликтует, или уберите публикацию).
+- Проверьте в **Environment Variables** ресурса, что
+  `SERVICE_BASE64_64_SECRETKEYBASE` реально заполнена (≥64 символов).
+  Магические переменные Coolify иногда остаются пустыми — тогда задайте
+  `SECRET_KEY_BASE` руками (`openssl rand -base64 48`): явное значение
+  имеет приоритет. С пустым/коротким секретом релиз падает на старте
+  с понятной ошибкой (см. «Диагностика»).
 - Обновление: redeploy в Coolify; миграции additive-only и выполняются
   на старте новой версии (ADR-0004).
 
@@ -70,6 +76,18 @@ docker compose -f docker-compose.prod.yaml up -d --build
   docker compose -f docker-compose.prod.yaml exec swatter \
     /app/bin/swatter rpc 'Swatter.Release.reset_password("admin@example.com")'
   ```
+
+## Логин отвечает 500: «cookie store expects conn.secret_key_base to be at least 64 bytes»
+
+В контейнер пришёл пустой или короткий `SECRET_KEY_BASE` (обычно — не
+заполнившаяся магическая переменная Coolify `SERVICE_BASE64_64_SECRETKEYBASE`).
+Приложение при этом стартует и `/health` зелёный: cookie-store проверяет секрет
+только при первой записи сессии, то есть на логине. Начиная с текущей версии
+релиз валидирует секрет на старте и падает сразу с этим же объяснением.
+
+Лечение: в Coolify задайте ресурсу переменную `SECRET_KEY_BASE`
+(`openssl rand -base64 48`) — она имеет приоритет над магической — и
+сделайте Restart/Redeploy. Смена секрета инвалидирует существующие сессии.
 
 ## Сборка падает на hex.pm (`:timeout`, «Unknown package … in lockfile»)
 

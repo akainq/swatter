@@ -18,9 +18,10 @@ services:
       SERVICE_FQDN_SWATTER_4000: ""
       PHX_HOST: ${SERVICE_FQDN_SWATTER:-localhost}
       PORT: "4000"
-      # без Coolify задайте сами: mix phx.gen.secret / openssl rand -base64 48
-      # (короткий фолбэк не пройдёт проверку Phoenix и уронит старт — осознанно)
-      SECRET_KEY_BASE: ${SERVICE_BASE64_64_SECRETKEYBASE:-${SECRET_KEY_BASE:-change-me}}
+      # приоритет у явного SECRET_KEY_BASE (openssl rand -base64 48) — так его
+      # можно задать в Coolify руками, если магическая переменная не заполнилась;
+      # пустое/короткое значение уронит старт релиза с внятной ошибкой (runtime.exs)
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:-${SERVICE_BASE64_64_SECRETKEYBASE:-}}
       DATABASE_URL: ecto://swatter:${SERVICE_PASSWORD_POSTGRES:-swatter}@postgres:5432/swatter
       REDIS_URL: redis://redis:6379
       CLICKHOUSE_URL: http://swatter:${SERVICE_PASSWORD_CLICKHOUSE:-swatter}@clickhouse:8123/swatter
